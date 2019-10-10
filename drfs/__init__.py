@@ -4,8 +4,9 @@
 
 __author__ = """Data Revenue GmbH"""
 __email__ = 'alan@datarevenue.com'
-__version__ = '0.1.0'
 
+from .path import DRPath
+from .structure import Tree, P
 from ._version import get_versions
 __version__ = get_versions()['version']
 del get_versions
