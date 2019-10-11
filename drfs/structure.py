@@ -62,12 +62,12 @@ class Tree(metaclass=_MetaTree):
             if isinstance(node_value, DRPathMixin):
                 if node_name == 'root':
                     continue
-                s = f'{node_name}: {node_value}'
+                s = f'{node_name}: {node_value}\n'
             elif isinstance(node_value, Tree):
                 s = f'{node_name}:\n{indent(str(node_value), "    ")}'
             else:
                 s = ''
-            res = f'{res}{s}\n'
+            res = f'{res}{s}'
         return res
 
 

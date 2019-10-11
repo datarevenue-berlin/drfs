@@ -35,21 +35,19 @@ structure = Structure('/root')
 
 # You can update root directory at any time. All paths will reflect this.
 structure.root = 's3://bucket'
-structure.migrated.stuff.format()
 
 # This is what the structure looks like now (obtained by `print(structure)`).
 """
-_root: NEW_ROOT
-data: NEW_ROOT/data
-dataset: NEW_ROOT/data/processed/{date}/*
+_root: s3://bucket
+data: s3://bucket/data
+dataset: s3://bucket/data/processed/{date}/*
 migrated:
-    _root: NEW_ROOT/migrated
-    stuff: NEW_ROOT/migrated/stf
-    things: NEW_ROOT/migrated/thngs
-
-processed: NEW_ROOT/data/processed
-raw: NEW_ROOT/raw
+    _root: s3://bucket/migrated
+    stuff: s3://bucket/migrated/stf
+    things: s3://bucket/migrated/thngs
+processed: s3://bucket/data/processed
+raw: s3://bucket/raw
 report:
-    _root: NEW_ROOT/rprt
-    evaluation: NEW_ROOT/rprt/eval
+    _root: s3://bucket/rprt
+    evaluation: s3://bucket/rprt/eval
 """
