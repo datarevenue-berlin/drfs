@@ -124,19 +124,15 @@ def asstr(arg):
     return arg
 
 
-def aspath(x, cls=None):
-    if isinstance(x, PurePath):
+def aspath(x):
+    if isinstance(x, DRPath):
         return x
-    if isinstance(x, str):
-        cls = cls or _get_path_class(x)
-        return cls(x)
     if isinstance(x, (list, tuple, set)):
         if len(x) == 0:
             return x
-        cls = cls or _get_path_class(next(iter(x)))  # get first element
-        return type(x)(map(cls, x))  # return the same type of iterable
-    raise TypeError("Cannot convert type {} to Path.".format(
-        type(x).__name__))
+        return type(x)(map(DRPath, x))  # return the same type of iterable
+    else:
+        return DRPath(x)
 
 
 def _get_path_class(path):

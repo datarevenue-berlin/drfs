@@ -1,3 +1,5 @@
+moto
+s3fs
 pip==18.1
 wheel==0.32.1
 watchdog==0.9.0
