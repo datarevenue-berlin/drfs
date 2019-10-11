@@ -27,6 +27,12 @@ try:
 except ImportError:
     warn('gcsfs not installed, skipping filesystem tests depending on gcsfs')
     GCSFileSystem = False
+try:
+    from drfs.filesystem import AzureBlobFileSystem
+except ImportError:
+    warn('azureblobfs not installed, skipping filesystem tests depending on '
+         'it.')
+    AzureBlobFileSystem = False
 
 
 EXPECTED_METHODS = {'remove', 'ls', 'open', 'exists', 'mv', 'makedirs',
@@ -43,10 +49,15 @@ def _get_fs_tuples():
         res.append(
             ('s3://test-bucket/some_file.txt', S3FileSystem))
     if GCSFileSystem:
-        res += [
+        res.extend([
             ('gs://test-bucket/some_file.txt', GCSFileSystem),
             ('gcs://test-bucket/some_file.txt', GCSFileSystem)
-        ]
+        ])
+    if AzureBlobFileSystem:
+        res.extend([
+            ('abfs://test-account/test-container/some_file.txt',
+             AzureBlobFileSystem),
+        ])
     return res
 
 
@@ -95,7 +106,6 @@ def test_local_filesystem(tmpdir):
 
 def test_filesystem_attributes():
     for cls in FILESYSTEMS.values():
-        assert cls()
         for key in EXPECTED_METHODS:
             assert hasattr(cls, key) and \
                    callable(getattr(cls, key))

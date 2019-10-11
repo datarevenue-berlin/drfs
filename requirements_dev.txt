@@ -1,3 +1,5 @@
+dask-azureblobfs
+toolz  # required for dask-azureblobfs, for some reason not discovered by pip
 moto
 s3fs
 pip==18.1

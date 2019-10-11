@@ -44,6 +44,11 @@ try:
 except ImportError:
     s3fs = None
 
+try:
+    import azureblobfs.dask as abfs
+except ImportError:
+    abfs = None
+
 
 FILESYSTEMS = {}
 
@@ -314,6 +319,23 @@ if s3fs is not None:
 # endregion
 
 
+# region Azure
+if abfs is not None:
+    class AzureBlobFileSystem(FileSystemBase):
+        fs_cls = abfs.DaskAzureBlobFileSystem
+        scheme = 'abfs'
+        is_remote = True
+    
+    def extract_abfs_account_name(path):
+        import re
+        account = re.match('abfs://(.*?)/.*', path).groups()[0]
+        return account
+    
+    FILESYSTEMS['abfs'] = AzureBlobFileSystem
+    
+# endregion
+
+
 def get_fs(path, opts=None):
     """Helper to infer filesystem correctly.
 
@@ -340,4 +362,6 @@ def get_fs(path, opts=None):
     opts_ = getattr(settings, 'FS_OPTS', {}).copy()  # type: dict
     if opts is not None:
         opts_.update(opts)
+    if cls is AzureBlobFileSystem and 'account_name' not in opts_:
+        opts_['account_name'] = extract_abfs_account_name(path)
     return cls(**opts_)
