@@ -45,7 +45,7 @@ class RemotePath(URL, DRPathMixin):
     def _accessor(self):
         if self._acc_real is None:
             try:
-                self._acc_real = FILESYSTEMS[self.scheme](settings.FS_OPTS)
+                self._acc_real = FILESYSTEMS[self.scheme](**settings.FS_OPTS)
             except KeyError:
                 raise ValueError('Scheme {} not found in available filesystems'
                                  ', try installing it.'.format(self.scheme))
@@ -106,7 +106,7 @@ class LocalPath(PATH_CLASS, DRPathMixin):
 class DRPath:
     def __new__(cls, path, *args, **kwargs):
         if cls is DRPath:
-            if get_fs(path).is_remote:
+            if get_fs(path, rtype='class').is_remote:
                 cls = RemotePath
             else:
                 cls = LocalPath

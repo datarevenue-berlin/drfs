@@ -325,18 +325,34 @@ if abfs is not None:
         fs_cls = abfs.DaskAzureBlobFileSystem
         scheme = 'abfs'
         is_remote = True
+        
+        @allow_pathlib
+        def exists(self, path, *args, **kwargs):
+            return self.fs.exists(*extract_abfs_parts(path)[1:],
+                                  *args, **kwargs)
+
+        @return_pathlib
+        @handle_schemes
+        @allow_pathlib
+        def ls(self, path, *args, **kwargs):
+            acc, cont, rest = extract_abfs_parts(path)
+            res = self.fs.ls(cont, os.path.join(rest, '*'), *args, **kwargs)
+            return [os.path.join(acc, item) for item in res]
     
-    def extract_abfs_account_name(path):
+    def extract_abfs_parts(path):
         import re
-        account = re.match('abfs://(.*?)/.*', path).groups()[0]
-        return account
+        match = re.match('abfs://(.*?)/(.*?)/(.*)', path)
+        if match is None:
+            raise ValueError(f"Path {path} doesn't match abfs path pattern.")
+        account, container, rest = match.groups()
+        return account, container, rest
     
     FILESYSTEMS['abfs'] = AzureBlobFileSystem
     
 # endregion
 
 
-def get_fs(path, opts=None):
+def get_fs(path, opts=None, rtype='instance'):
     """Helper to infer filesystem correctly.
 
     Gets filesystem options from settings and updates them with given `opts`.
@@ -347,6 +363,8 @@ def get_fs(path, opts=None):
         Path for which we want to infer filesystem.
     opts: dict
         Kwargs that will be passed to inferred filesystem instance.
+    rtype: str
+        Either 'instance' (default) or 'class'.
     """
     try:
         protocol = path.scheme
@@ -355,6 +373,8 @@ def get_fs(path, opts=None):
 
     try:
         cls = FILESYSTEMS[protocol]
+        if rtype == 'class':
+            return cls
     except KeyError:
         raise KeyError(f"No filesystem for protocol {protocol}. Try "
                        f"installing it. Available protocols are: "
@@ -363,5 +383,5 @@ def get_fs(path, opts=None):
     if opts is not None:
         opts_.update(opts)
     if cls is AzureBlobFileSystem and 'account_name' not in opts_:
-        opts_['account_name'] = extract_abfs_account_name(path)
+        opts_['account_name'] = extract_abfs_parts(path)[0]
     return cls(**opts_)

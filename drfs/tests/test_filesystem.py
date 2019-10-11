@@ -28,7 +28,7 @@ except ImportError:
     warn('gcsfs not installed, skipping filesystem tests depending on gcsfs')
     GCSFileSystem = False
 try:
-    from drfs.filesystem import AzureBlobFileSystem
+    from drfs.filesystem import AzureBlobFileSystem, extract_abfs_parts
 except ImportError:
     warn('azureblobfs not installed, skipping filesystem tests depending on '
          'it.')
@@ -231,6 +231,13 @@ def test_return_pathlib():
     assert isinstance(foo.f('hey'), Path)
     assert all([isinstance(item, Path) for item in foo.f(['hey', 'ho'])])
 
+
+@pytest.mark.skipif('not AzureBlobFileSystem')
+def test_extract_abfs_parts():
+    assert extract_abfs_parts('abfs://acc/cont/file') == ('acc', 'cont')
+    assert extract_abfs_parts('abfs://acc/cont/dir/file') == ('acc', 'cont')
+    with pytest.raises(ValueError, match="doesn't match abfs"):
+        extract_abfs_parts('abfas://acc/cont/dir/file')
 
 # @pytest.mark.skipif(not GCSFileSystem, reason='gcsfs not installed')
 # @my_vcr.use_cassette
