@@ -31,10 +31,11 @@ class Structure(Tree):
 
 
 # Instantiate defined class giving it a name of root directory.
-structure = Structure('ROOT')
+structure = Structure('/root')
 
 # You can update root directory at any time. All paths will reflect this.
-structure.root = 'NEW_ROOT'
+structure.root = 's3://bucket'
+structure.migrated.stuff.format()
 
 # This is what the structure looks like now (obtained by `str(structure)`).
 """

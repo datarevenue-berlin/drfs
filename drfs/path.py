@@ -6,10 +6,12 @@ from urlpath import URL, cached_property
 from drfs import settings
 from drfs.filesystem import FILESYSTEMS, get_fs
 
-
-# What Path() returns depends on the OS, that's why we're not subclassing Path
+# Actual type of Path depends on the OS, so we can't subclass from Path
 # directly.
-class DRPath(type(Path())):
+PATH_CLASS = type(Path())
+
+
+class DRPathMixin:
     @property
     def istemplate(self):
         s = str(self)
@@ -27,7 +29,7 @@ class DRPath(type(Path())):
         return DRPath(str(self).format(*args, **kwargs))
 
 
-class RemotePath(URL):
+class RemotePath(URL, DRPathMixin):
     """A very pathlib.Path version for RemotePaths."""
 
     def __new__(cls, *args, **kwargs):
@@ -96,6 +98,21 @@ class RemotePath(URL):
                + self._flavour.sep.join(urllib.parse.quote(i, safe=safe_pchars) for i in self._parts[begin:-1] + [self.name]) \
                + self.trailing_sep
 
+
+class LocalPath(PATH_CLASS, DRPathMixin):
+    pass
+
+
+class DRPath:
+    def __new__(cls, path, *args, **kwargs):
+        if cls is DRPath:
+            if get_fs(path).is_remote:
+                cls = RemotePath
+            else:
+                cls = LocalPath
+        obj = cls(path, *args, **kwargs)
+        return obj
+    
 
 def asstr(arg):
     """Convert arg into its string representation.

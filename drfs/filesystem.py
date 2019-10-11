@@ -32,7 +32,6 @@ from glob import glob as glob_
 import pytz
 
 from . import settings
-from .path import aspath, asstr
 from .util import prepend_scheme
 
 try:
@@ -67,6 +66,7 @@ def allow_pathlib(func):
     def wrapper(self, path, *args, **kwargs):
         # Can only be used if path is passed as first argument right
         # after self
+        from drfs.path import asstr
         p = asstr(path)
         return func(self, p, *args, **kwargs)
     return wrapper
@@ -76,6 +76,7 @@ def allow_pathlib(func):
 def return_pathlib(func):
     @wraps(func)
     def wrapper(self, path, *args, **kwargs):
+        from drfs.path import aspath
         res = func(self, path, *args, **kwargs)
         as_path = aspath(res)
         return as_path
@@ -253,7 +254,7 @@ class LocalFileSystem(FileSystemBase):
         self.open(path, 'w').close()
 
 
-FILESYSTEMS[''] = LocalFileSystem,
+FILESYSTEMS[''] = LocalFileSystem
 FILESYSTEMS['file'] = LocalFileSystem
 # endregion
 
@@ -299,10 +300,12 @@ if s3fs is not None:
             pass
 
         def put(self, filename, path, **kwargs):
+            from drfs.path import asstr
             filename, path = asstr(filename), asstr(path)
             return self.fs.put(filename, path, **kwargs)
 
         def get(self, path, filename, **kwargs):
+            from drfs.path import asstr
             path, filename = asstr(path), asstr(filename)
             return self.fs.get(path, filename, **kwargs)
 
@@ -328,7 +331,12 @@ def get_fs(path, opts=None):
     except AttributeError:
         protocol = urllib.parse.urlparse(str(path)).scheme
 
-    cls = FILESYSTEMS[protocol]
+    try:
+        cls = FILESYSTEMS[protocol]
+    except KeyError:
+        raise KeyError(f"No filesystem for protocol {protocol}. Try "
+                       f"installing it. Available protocols are: "
+                       f"{set(FILESYSTEMS.keys())}")
     opts_ = getattr(settings, 'FS_OPTS', {}).copy()  # type: dict
     if opts is not None:
         opts_.update(opts)

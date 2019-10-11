@@ -3,7 +3,7 @@ from pathlib import Path
 from textwrap import indent
 from typing import Union
 
-from .path import DRPath
+from .path import DRPath, DRPathMixin
 
 
 class _MetaTree(type):
@@ -13,7 +13,7 @@ class _MetaTree(type):
             if attr_name in ['root'] or attr_name.startswith('__'):
                 new_attrs[attr_name] = attr_value
                 continue
-            elif isinstance(attr_value, (str, DRPath)):
+            elif isinstance(attr_value, (str, DRPathMixin)):
                 new_attrs[attr_name] = mcs._make_property(attr_value)
             elif isinstance(attr_value, type):
                 new_attrs[attr_name] = attr_value(attr_name)
@@ -59,7 +59,7 @@ class _BaseTree:
     def __str__(self):
         res = ""
         for node_name, node_value in self._get_nodes():
-            if isinstance(node_value, DRPath):
+            if isinstance(node_value, DRPathMixin):
                 if node_name == 'root':
                     continue
                 s = f'{node_name}: {node_value}'
@@ -77,4 +77,4 @@ class Tree(_BaseTree, metaclass=_MetaTree):
 
 
 # Use this as a type hint for paths for better autocomplete.
-P = Union[Path, DRPath]
+P = Union[Path, DRPathMixin]
