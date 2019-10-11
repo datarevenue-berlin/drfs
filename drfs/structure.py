@@ -31,7 +31,7 @@ class _MetaTree(type):
         return foo
 
 
-class _BaseTree:
+class Tree(metaclass=_MetaTree):
     def __init__(self, root):
         self.root = DRPath(root)
     
@@ -44,7 +44,7 @@ class _BaseTree:
         value = DRPath(value)
         self._root = value
         for node_name, node_value in self._get_nodes():
-            if isinstance(node_value, _BaseTree):
+            if isinstance(node_value, Tree):
                 node_root = getattr(node_value, '__root__', node_name)
                 node_value.root = self._root / node_root
     
@@ -63,17 +63,12 @@ class _BaseTree:
                 if node_name == 'root':
                     continue
                 s = f'{node_name}: {node_value}'
-            elif isinstance(node_value, _BaseTree):
+            elif isinstance(node_value, Tree):
                 s = f'{node_name}:\n{indent(str(node_value), "    ")}'
             else:
                 s = ''
             res = f'{res}{s}\n'
         return res
-
-
-class Tree(_BaseTree, metaclass=_MetaTree):
-    """Subclass from this to create your file structure. See _example.py."""
-    pass
 
 
 # Use this as a type hint for paths for better autocomplete.

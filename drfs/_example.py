@@ -37,7 +37,7 @@ structure = Structure('/root')
 structure.root = 's3://bucket'
 structure.migrated.stuff.format()
 
-# This is what the structure looks like now (obtained by `str(structure)`).
+# This is what the structure looks like now (obtained by `print(structure)`).
 """
 _root: NEW_ROOT
 data: NEW_ROOT/data
