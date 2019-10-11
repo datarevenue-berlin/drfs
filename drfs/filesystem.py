@@ -32,7 +32,8 @@ from glob import glob as glob_
 import pytz
 
 from . import settings
-from .util import any2path, path2str, prepend_scheme
+from .path import aspath, asstr
+from .util import prepend_scheme
 
 try:
     import gcsfs
@@ -66,7 +67,7 @@ def allow_pathlib(func):
     def wrapper(self, path, *args, **kwargs):
         # Can only be used if path is passed as first argument right
         # after self
-        p = path2str(path)
+        p = asstr(path)
         return func(self, p, *args, **kwargs)
     return wrapper
 
@@ -76,7 +77,7 @@ def return_pathlib(func):
     @wraps(func)
     def wrapper(self, path, *args, **kwargs):
         res = func(self, path, *args, **kwargs)
-        as_path = any2path(res)
+        as_path = aspath(res)
         return as_path
     return wrapper
 
@@ -95,6 +96,7 @@ def handle_schemes(func):
     return wrapper
 
 
+# region Base
 class FileSystemBase:
 
     fs_cls = None  # type: type
@@ -171,8 +173,10 @@ class FileSystemBase:
     def rm(self, *args, **kwargs):
         """rm is an alias for remove"""
         return self.remove(*args, **kwargs)
+# endregion
 
 
+# region Local
 class LocalFileSystem(FileSystemBase):
     """Emulates a remote filesystem on the local disk."""
 
@@ -251,8 +255,10 @@ class LocalFileSystem(FileSystemBase):
 
 FILESYSTEMS[''] = LocalFileSystem,
 FILESYSTEMS['file'] = LocalFileSystem
+# endregion
 
 
+# region GCS
 if gcsfs is not None:
     class GCSFileSystem(FileSystemBase):
         """Wrapper for dask's GCSFileSystem."""
@@ -271,7 +277,10 @@ if gcsfs is not None:
 
     FILESYSTEMS['gs'] = GCSFileSystem
     FILESYSTEMS['gcs'] = GCSFileSystem
+# endregion
 
+
+# region S3
 if s3fs is not None:
 
     class S3FileSystem(FileSystemBase):
@@ -290,18 +299,19 @@ if s3fs is not None:
             pass
 
         def put(self, filename, path, **kwargs):
-            filename, path = path2str(filename), path2str(path)
+            filename, path = asstr(filename), asstr(path)
             return self.fs.put(filename, path, **kwargs)
 
         def get(self, path, filename, **kwargs):
-            path, filename = path2str(path), path2str(filename)
+            path, filename = asstr(path), asstr(filename)
             return self.fs.get(path, filename, **kwargs)
 
 
     FILESYSTEMS['s3'] = S3FileSystem
+# endregion
 
 
-def get_filesystem(path, opts=None, rtype=None):
+def get_fs(path, opts=None):
     """Helper to infer filesystem correctly.
 
     Gets filesystem options from settings and updates them with given `opts`.
@@ -311,34 +321,15 @@ def get_filesystem(path, opts=None, rtype=None):
     path: str
         Path for which we want to infer filesystem.
     opts: dict
-        Kwargs that will be passed to inferred filesystem instance,
-        in case an instance should be returned.
-    rtype: None | str
-        Controls whether a class or instance should be returned.
-        If None, GET_FILESYSTEM_RTYPE setting decides. If str, should be
-        either 'class' or 'instance'.
+        Kwargs that will be passed to inferred filesystem instance.
     """
     try:
         protocol = path.scheme
     except AttributeError:
         protocol = urllib.parse.urlparse(str(path)).scheme
+
     cls = FILESYSTEMS[protocol]
-
-    if rtype is None:
-        rtype = getattr(settings, 'GET_FILESYSTEM_RTYPE', 'class')
-    if rtype == 'instance':
-        return_instance = True
-    elif rtype == 'class':
-        return_instance = False
-    else:
-        raise ValueError("rtype must be one of 'class', 'instance' "
-                         "or None. If None, GET_FILESYSTEM_RTYPE setting "
-                         "should be either 'class' or 'instance'.")
-
-    if return_instance:
-        opts_ = getattr(settings, 'FS_OPTS', {}).copy()  # type: dict
-        if opts is not None:
-            opts_.update(opts)
-        return cls(**opts_)
-    else:
-        return cls
+    opts_ = getattr(settings, 'FS_OPTS', {}).copy()  # type: dict
+    if opts is not None:
+        opts_.update(opts)
+    return cls(**opts_)

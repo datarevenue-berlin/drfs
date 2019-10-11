@@ -1,10 +1,10 @@
 import urllib.parse
-from pathlib import Path
+from pathlib import Path, PurePath
 
 from urlpath import URL, cached_property
 
 from drfs import settings
-from drfs.filesystem import FILESYSTEMS
+from drfs.filesystem import FILESYSTEMS, get_fs
 
 
 # What Path() returns depends on the OS, that's why we're not subclassing Path
@@ -95,3 +95,35 @@ class RemotePath(URL):
         return self._root \
                + self._flavour.sep.join(urllib.parse.quote(i, safe=safe_pchars) for i in self._parts[begin:-1] + [self.name]) \
                + self.trailing_sep
+
+
+def asstr(arg):
+    """Convert arg into its string representation.
+
+    This is only done if arg is subclass of PurePath
+    """
+    if issubclass(type(arg), PurePath):
+        return str(arg)
+    return arg
+
+
+def aspath(x, cls=None):
+    if isinstance(x, PurePath):
+        return x
+    if isinstance(x, str):
+        cls = cls or _get_path_class(x)
+        return cls(x)
+    if isinstance(x, (list, tuple, set)):
+        if len(x) == 0:
+            return x
+        cls = cls or _get_path_class(next(iter(x)))  # get first element
+        return type(x)(map(cls, x))  # return the same type of iterable
+    raise TypeError("Cannot convert type {} to Path.".format(
+        type(x).__name__))
+
+
+def _get_path_class(path):
+    if get_fs(path).is_remote:
+        return RemotePath
+    else:
+        return Path
