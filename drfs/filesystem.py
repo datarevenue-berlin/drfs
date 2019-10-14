@@ -337,7 +337,7 @@ if abfs is not None:
         def ls(self, path, *args, **kwargs):
             acc, cont, rest = extract_abfs_parts(path)
             res = self.fs.ls(cont, os.path.join(rest, '*'), *args, **kwargs)
-            return [os.path.join(acc, item) for item in res]
+            return [os.path.join(acc, cont, item) for item in res]
     
     def extract_abfs_parts(path):
         import re
