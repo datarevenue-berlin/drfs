@@ -19,6 +19,7 @@ class DRPathMixin:
     
     @property
     def iswildcard(self):
+        # FIXME: doesn't work for something like *.csv
         return '*' in self._parts
     
     @property

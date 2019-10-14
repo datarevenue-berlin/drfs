@@ -6,30 +6,27 @@ from typing import Union
 from .path import DRPath, DRPathMixin
 
 
+def _root_function(value):
+    def foo(self):
+        return self.root / value
+    return foo
+
+
 class _MetaTree(type):
     def __new__(mcs, name, bases, attrs):
         new_attrs = {}
         for attr_name, attr_value in attrs.items():
             if attr_name in ['root'] or attr_name.startswith('__'):
                 new_attrs[attr_name] = attr_value
-                continue
             elif isinstance(attr_value, (str, DRPathMixin)):
-                new_attrs[attr_name] = mcs._make_property(attr_value)
-            elif isinstance(attr_value, type):
+                new_attrs[attr_name] = property(_root_function(attr_value))
+            elif isinstance(attr_value, type) and issubclass(attr_value, Tree):
                 new_attrs[attr_name] = attr_value(attr_name)
             else:
                 new_attrs[attr_name] = attr_value
         
         return type.__new__(mcs, name, bases, new_attrs)
     
-    @classmethod
-    def _make_property(mcs, value):
-        def foo(self):
-            return self.root / value
-        
-        foo = property(foo)
-        return foo
-
 
 class Tree(metaclass=_MetaTree):
     def __init__(self, root):
@@ -41,6 +38,7 @@ class Tree(metaclass=_MetaTree):
     
     @root.setter
     def root(self, value):
+        """Recursively set root in this and all child trees."""
         value = DRPath(value)
         self._root = value
         for node_name, node_value in self._get_nodes():
@@ -69,6 +67,11 @@ class Tree(metaclass=_MetaTree):
                 s = ''
             res = f'{res}{s}'
         return res
+    
+    def add(self, key, value):
+        if isinstance(value, (str, DRPathMixin)):
+            value = _root_function(value)
+        setattr(self, key, value)
 
 
 # Use this as a type hint for paths for better autocomplete.
