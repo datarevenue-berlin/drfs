@@ -1,5 +1,7 @@
+# Filesystem imports:
 import drfs.filesystems.local
-from drfs.filesystems.base import FILESYSTEMS, get_fs
+from drfs.filesystems.base import FILESYSTEMS
+from drfs.filesystems.util import get_fs
 
 try:
     import drfs.filesystems.gcs

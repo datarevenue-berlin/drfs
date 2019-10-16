@@ -1,6 +1,7 @@
 import s3fs
 
-from drfs.filesystems.base import FILESYSTEMS, FileSystemBase, allow_pathlib
+from drfs.filesystems.base import FILESYSTEMS, FileSystemBase
+from drfs.filesystems.util import allow_pathlib
 
 
 class S3FileSystem(FileSystemBase):

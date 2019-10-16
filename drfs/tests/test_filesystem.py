@@ -11,9 +11,10 @@ from warnings import warn
 
 import pytest
 
-from drfs.filesystems.base import FILESYSTEMS, get_fs, \
-    return_pathlib
+from drfs.filesystems import get_fs
+from drfs.filesystems.base import FILESYSTEMS
 from drfs.filesystems.local import LocalFileSystem
+from drfs.filesystems.util import return_pathlib
 from drfs.path import LocalPath, RemotePath, aspath
 
 try:

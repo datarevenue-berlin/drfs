@@ -2,8 +2,8 @@ import os
 
 from azureblobfs import dask as abfs
 
-from drfs.filesystems.base import FILESYSTEMS, FileSystemBase, allow_pathlib, \
-    handle_schemes, return_pathlib
+from drfs.filesystems.base import FILESYSTEMS, FileSystemBase
+from drfs.filesystems.util import allow_pathlib, handle_schemes, return_pathlib
 
 
 class AzureBlobFileSystem(FileSystemBase):

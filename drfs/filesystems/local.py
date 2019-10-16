@@ -6,7 +6,8 @@ from glob import glob as glob_
 
 import pytz
 
-from .base import FILESYSTEMS, FileSystemBase, allow_pathlib, return_pathlib
+from drfs.filesystems.util import allow_pathlib, return_pathlib
+from .base import FILESYSTEMS, FileSystemBase
 
 
 class LocalFileSystem(FileSystemBase):
