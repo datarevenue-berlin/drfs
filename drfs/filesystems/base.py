@@ -21,7 +21,8 @@ Currently methods that are required to be implemented are:
 
 Which filesystem to use is usually inferred from the path/protocol.
 """
-from .util import allow_pathlib, return_pathlib, return_schemes
+from .util import allow_pathlib, return_pathlib, return_schemes, \
+    strip_input_schemes
 
 FILESYSTEMS = {}
 
@@ -50,6 +51,7 @@ class FileSystemBase:
     @return_pathlib
     @return_schemes
     @allow_pathlib
+    @strip_input_schemes
     def ls(self, path, *args, **kwargs):
         return self.fs.ls(path, *args, **kwargs)
 

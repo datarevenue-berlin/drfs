@@ -2,7 +2,7 @@ import urllib.parse
 from functools import partial, wraps
 
 from drfs import settings
-from drfs.util import prepend_scheme
+from drfs.util import prepend_scheme, strip_scheme
 
 
 def get_fs(path, opts=None, rtype='instance'):
@@ -43,8 +43,7 @@ def get_fs(path, opts=None, rtype='instance'):
 
 def _fix_opts_abfs(cls, path, opts: dict):
     try:
-        from drfs.filesystems.azure_blob import AzureBlobFileSystem, \
-            extract_abfs_parts
+        from drfs.filesystems.azure_blob import AzureBlobFileSystem
     except ImportError:
         AzureBlobFileSystem = extract_abfs_parts = None
 
@@ -52,7 +51,7 @@ def _fix_opts_abfs(cls, path, opts: dict):
             and cls is AzureBlobFileSystem \
             and 'account_name' not in opts:
         opts = opts.copy()
-        opts['account_name'] = extract_abfs_parts(path)[0]
+        opts['account_name'] = extract_azure_parts(path)[0]
     return opts
 
 
@@ -100,3 +99,25 @@ def return_schemes(func):
             res = prepend_scheme(self.scheme, res)
         return res
     return wrapper
+
+
+def strip_input_schemes(func):
+    """Strip scheme from input path(s)"""
+    @wraps(func)
+    def wrapper(self, path, *args, **kwargs):
+        if isinstance(path, (list, tuple)):
+            path = type(path)(map(strip_scheme, path))
+        else:
+            path = strip_scheme(path)
+        res = func(self, path, *args, **kwargs)
+        return res
+    return wrapper
+
+
+def extract_azure_parts(path, protocol='abfs'):
+    import re
+    match = re.match(f'{protocol}://(.*?)/(.*?)/(.*)', path)
+    if match is None:
+        raise ValueError(f"Path {path} doesn't match abfs path pattern.")
+    account, container, rest = match.groups()
+    return account, container, rest

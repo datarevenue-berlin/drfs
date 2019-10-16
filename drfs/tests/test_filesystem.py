@@ -29,8 +29,7 @@ except ImportError:
     warn('gcsfs not installed, skipping filesystem tests depending on gcsfs')
     GCSFileSystem = False
 try:
-    from drfs.filesystems.azure_blob import AzureBlobFileSystem, \
-        extract_abfs_parts
+    from drfs.filesystems.azure_blob import AzureBlobFileSystem
 except ImportError:
     warn('azureblobfs not installed, skipping filesystem tests depending on '
          'it.')

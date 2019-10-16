@@ -21,3 +21,12 @@ def prepend_scheme(scheme, path):
     else:
         path = path[1:] if path.startswith('/') else path
         return f'{scheme}://{path}'
+
+
+def strip_scheme(path: str):
+    if not isinstance(path, str):
+        raise TypeError('Path should be string.')
+    idx = path.find('://')
+    if idx >=0:
+        return path[idx + 3:]
+    return path
