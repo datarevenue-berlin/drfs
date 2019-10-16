@@ -1,4 +1,3 @@
-# Filesystem imports:
 import drfs.filesystems.local
 from drfs.filesystems.base import FILESYSTEMS
 from drfs.filesystems.util import get_fs
@@ -18,3 +17,7 @@ try:
 except ImportError:
     pass
 
+try:
+    import drfs.filesystems.azure_datalake
+except ImportError:
+    pass
