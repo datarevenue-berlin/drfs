@@ -16,7 +16,7 @@ class DRPathMixin:
     @property
     def is_template(self):
         s = str(self)
-        return '{' in s and '}' in s
+        return 0 <= s.find('{') < s.find('}')
     
     @property
     def is_wildcard(self):
