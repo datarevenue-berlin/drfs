@@ -5,10 +5,9 @@ from pathlib import Path, PurePath
 from urlpath import URL, cached_property
 
 from drfs import settings
-from drfs.filesystem import FILESYSTEMS, get_fs
+from drfs.filesystems import FILESYSTEMS, get_fs
 
-# Actual type of Path depends on the OS, so we can't subclass from Path
-# directly.
+# Actual type of Path depends on the OS and is determined on instantiation.
 PATH_CLASS = type(Path())
 
 

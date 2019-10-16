@@ -21,34 +21,12 @@ Currently methods that are required to be implemented are:
 
 Which filesystem to use is usually inferred from the path/protocol.
 """
-import builtins
-import datetime
-import os
-import shutil
 import urllib.parse
 from functools import partial, wraps
-from glob import glob as glob_
 
-import pytz
-
-from . import settings
-from .util import prepend_scheme
-
-try:
-    import gcsfs
-except ImportError:
-    gcsfs = None
-
-try:
-    import s3fs
-except ImportError:
-    s3fs = None
-
-try:
-    import azureblobfs.dask as abfs
-except ImportError:
-    abfs = None
-
+from drfs import settings
+from drfs.filesystems.azure_blob import AzureBlobFileSystem, extract_abfs_parts
+from drfs.util import prepend_scheme
 
 FILESYSTEMS = {}
 
@@ -102,7 +80,6 @@ def handle_schemes(func):
     return wrapper
 
 
-# region Base
 class FileSystemBase:
 
     fs_cls = None  # type: type
@@ -179,177 +156,6 @@ class FileSystemBase:
     def rm(self, *args, **kwargs):
         """rm is an alias for remove"""
         return self.remove(*args, **kwargs)
-# endregion
-
-
-# region Local
-class LocalFileSystem(FileSystemBase):
-    """Emulates a remote filesystem on the local disk."""
-
-    fs_cls = None  # we could do even without subclassing FSBase
-    scheme = ''
-    is_remote = False
-
-    @allow_pathlib
-    def open(self, path, *args, **kwargs):
-        """Open a file."""
-        self._makedirs_parent(path)
-        return builtins.open(path, *args, **kwargs)
-
-    @allow_pathlib
-    def exists(self, path):
-        """Return True if file exists."""
-        return os.path.exists(path)
-
-    @allow_pathlib
-    def _makedirs_parent(self, path):
-        dir_ = os.path.dirname(path)
-        os.makedirs(dir_, exist_ok=1)
-
-    @allow_pathlib
-    def makedirs(self, *args, **kwargs):
-        os.makedirs(*args, **kwargs)
-
-    @allow_pathlib
-    def remove(self, path):
-        """Remove a file."""
-        os.remove(path)
-
-    @return_pathlib
-    @allow_pathlib
-    def ls(self, path):
-        """List directory."""
-        return list(map(lambda x: os.path.join(path, x), os.listdir(path)))
-
-    @allow_pathlib
-    def mv(self, src, dst):
-        """Move file or directory. Source parent dir will be created."""
-        self._makedirs_parent(dst)
-        shutil.move(src, dst)
-
-    @allow_pathlib
-    def rmdir(self, path):
-        """Remove directory."""
-        os.rmdir(path)
-
-    @allow_pathlib
-    def info(self, path):
-        """Get a dict with only LastModified time in UTC."""
-        mtime = os.path.getmtime(path)
-        return {
-            'LastModified': datetime.datetime.fromtimestamp(mtime, pytz.UTC)
-        }
-
-    @return_pathlib
-    @allow_pathlib
-    def walk(self, path):
-        """Walk over all files in this directory (recursively)."""
-        return [os.path.join(root, f)
-                for root, dirs, files in os.walk(path)
-                for f in files]
-
-    @return_pathlib
-    @allow_pathlib
-    def glob(self, path):
-        """Find files by glob-matching."""
-        return glob_(path)
-
-    @allow_pathlib
-    def touch(self, path):
-        self.open(path, 'w').close()
-
-
-FILESYSTEMS[''] = LocalFileSystem
-FILESYSTEMS['file'] = LocalFileSystem
-# endregion
-
-
-# region GCS
-if gcsfs is not None:
-    class GCSFileSystem(FileSystemBase):
-        """Wrapper for dask's GCSFileSystem."""
-        fs_cls = gcsfs.GCSFileSystem
-        scheme = 'gs'
-        is_remote = True
-
-        @allow_pathlib
-        def remove(self, *args, **kwargs):
-            """Remove file."""
-            self.fs.rm(*args, **kwargs)
-
-        def makedirs(self, *args, **kwargs):
-            raise NotImplementedError
-
-
-    FILESYSTEMS['gs'] = GCSFileSystem
-    FILESYSTEMS['gcs'] = GCSFileSystem
-# endregion
-
-
-# region S3
-if s3fs is not None:
-
-    class S3FileSystem(FileSystemBase):
-        fs_cls = s3fs.S3FileSystem
-        scheme = 's3'
-        is_remote = True
-
-        @allow_pathlib
-        def touch(self, *args, **kwargs):
-            return self.fs.touch(*args, **kwargs)
-
-        def makedirs(self, *args, **kwargs):
-            pass
-
-        def rmdir(self, path, **kwargs):
-            pass
-
-        def put(self, filename, path, **kwargs):
-            from drfs.path import asstr
-            filename, path = asstr(filename), asstr(path)
-            return self.fs.put(filename, path, **kwargs)
-
-        def get(self, path, filename, **kwargs):
-            from drfs.path import asstr
-            path, filename = asstr(path), asstr(filename)
-            return self.fs.get(path, filename, **kwargs)
-
-
-    FILESYSTEMS['s3'] = S3FileSystem
-# endregion
-
-
-# region Azure
-if abfs is not None:
-    class AzureBlobFileSystem(FileSystemBase):
-        fs_cls = abfs.DaskAzureBlobFileSystem
-        scheme = 'abfs'
-        is_remote = True
-        
-        @allow_pathlib
-        def exists(self, path, *args, **kwargs):
-            return self.fs.exists(*extract_abfs_parts(path)[1:],
-                                  *args, **kwargs)
-
-        @return_pathlib
-        @handle_schemes
-        @allow_pathlib
-        def ls(self, path, *args, **kwargs):
-            acc, cont, rest = extract_abfs_parts(path)
-            res = self.fs.ls(cont, os.path.join(rest, '*'), *args, **kwargs)
-            return [os.path.join(acc, cont, item) for item in res]
-    
-    def extract_abfs_parts(path):
-        import re
-        match = re.match('abfs://(.*?)/(.*?)/(.*)', path)
-        if match is None:
-            raise ValueError(f"Path {path} doesn't match abfs path pattern.")
-        account, container, rest = match.groups()
-        return account, container, rest
-    
-    FILESYSTEMS['abfs'] = AzureBlobFileSystem
-    
-# endregion
 
 
 def get_fs(path, opts=None, rtype='instance'):

@@ -11,24 +11,26 @@ from warnings import warn
 
 import pytest
 
-from drfs.filesystem import FILESYSTEMS, LocalFileSystem, get_fs, \
+from drfs.filesystems.base import FILESYSTEMS, get_fs, \
     return_pathlib
+from drfs.filesystems.local import LocalFileSystem
 from drfs.path import LocalPath, RemotePath, aspath
 
 try:
-    from drfs.filesystem import S3FileSystem
+    from drfs.filesystems.s3 import S3FileSystem
 except ImportError:
     warn('s3fs not installed, skipping filesystem tests depending on s3fs')
     S3FileSystem = False
 try:
-    from drfs.filesystem import GCSFileSystem
+    from drfs.filesystems.gcs import GCSFileSystem
     # my_vcr = GCSFSVCR(os.path.join(os.path.dirname(__file__), 'recordings'))\
     #     .my_vcr
 except ImportError:
     warn('gcsfs not installed, skipping filesystem tests depending on gcsfs')
     GCSFileSystem = False
 try:
-    from drfs.filesystem import AzureBlobFileSystem, extract_abfs_parts
+    from drfs.filesystems.azure_blob import AzureBlobFileSystem, \
+        extract_abfs_parts
 except ImportError:
     warn('azureblobfs not installed, skipping filesystem tests depending on '
          'it.')
