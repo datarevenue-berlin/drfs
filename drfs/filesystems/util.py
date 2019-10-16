@@ -89,7 +89,7 @@ def return_pathlib(func):
     return wrapper
 
 
-def handle_schemes(func):
+def return_schemes(func):
     """Make sure method returns full path with scheme."""
     @wraps(func)
     def wrapper(self, path, *args, **kwargs):

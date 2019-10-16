@@ -3,7 +3,7 @@ import os
 import azureblobfs.dask as abfs
 
 from drfs.filesystems.base import FILESYSTEMS, FileSystemBase
-from drfs.filesystems.util import allow_pathlib, handle_schemes, return_pathlib
+from drfs.filesystems.util import allow_pathlib, return_pathlib, return_schemes
 
 
 class AzureBlobFileSystem(FileSystemBase):
@@ -17,7 +17,7 @@ class AzureBlobFileSystem(FileSystemBase):
                               *args, **kwargs)
 
     @return_pathlib
-    @handle_schemes
+    @return_schemes
     @allow_pathlib
     def ls(self, path, *args, **kwargs):
         acc, cont, rest = extract_abfs_parts(path)
