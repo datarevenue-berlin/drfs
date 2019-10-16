@@ -46,7 +46,15 @@ class DRPathMixin:
 
 
 class RemotePath(URL, DRPathMixin):
-    """A very pathlib.Path version for RemotePaths."""
+    """
+    A very pathlib.Path version for RemotePaths.
+    
+    If you use a method that requires an underlying filesystem to
+    be instantiated (such as `open`), storage_options may be needed (to provide
+    credentials etc.). They are taken from settings.FS_OPTS by default,
+    but you can also set them by providing `storage_options` kwarg on path
+    instantiation.
+    """
 
     def __new__(cls, *args, storage_options=None, **kwargs):
         self = cls._from_parts(args, init=False)
@@ -118,6 +126,7 @@ class RemotePath(URL, DRPathMixin):
     def _make_child(self, args):
         res = super()._make_child(args)
         res._storage_options = self._storage_options
+        res._acc_real = self._acc_real
         return res
 
 
