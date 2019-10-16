@@ -14,12 +14,12 @@ PATH_CLASS = type(Path())
 # noinspection PyUnresolvedReferences
 class DRPathMixin:
     @property
-    def istemplate(self):
+    def is_template(self):
         s = str(self)
         return '{' in s and '}' in s
     
     @property
-    def iswildcard(self):
+    def is_wildcard(self):
         # FIXME: doesn't work for something like *.csv
         return '*' in self._parts
     
