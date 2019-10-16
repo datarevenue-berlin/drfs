@@ -145,7 +145,7 @@ def asstr(arg):
 
 
 def aspath(x):
-    if isinstance(x, DRPath):
+    if isinstance(x, DRPathMixin):
         return x
     if isinstance(x, (list, tuple, set)):
         if len(x) == 0:
