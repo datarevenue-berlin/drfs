@@ -1,4 +1,5 @@
 import urllib.parse
+import warnings
 from pathlib import Path, PurePath
 
 from urlpath import URL, cached_property
@@ -11,6 +12,7 @@ from drfs.filesystem import FILESYSTEMS, get_fs
 PATH_CLASS = type(Path())
 
 
+# noinspection PyUnresolvedReferences
 class DRPathMixin:
     @property
     def istemplate(self):
@@ -28,14 +30,36 @@ class DRPathMixin:
     
     def format(self, *args, **kwargs):
         return DRPath(str(self).format(*args, **kwargs))
+    
+    @property
+    def storage_options(self):
+        try:
+            opts = self._storage_options
+        except AttributeError as e:
+            warnings.warn(str(e))
+            return None
+        if opts is not None:
+            return opts
+        return settings.FS_OPTS
+    
+    opts = storage_options
 
 
 class RemotePath(URL, DRPathMixin):
-    """A very pathlib.Path version for RemotePaths."""
+    """
+    A very pathlib.Path version for RemotePaths.
+    
+    If you use a method that requires an underlying filesystem to
+    be instantiated (such as `open`), storage_options may be needed (to provide
+    credentials etc.). They are taken from settings.FS_OPTS by default,
+    but you can also set them by providing `storage_options` kwarg on path
+    instantiation.
+    """
 
-    def __new__(cls, *args, **kwargs):
+    def __new__(cls, *args, storage_options=None, **kwargs):
         self = cls._from_parts(args, init=False)
         self._init()
+        self._storage_options = storage_options
         return self
 
     def _init(self):
@@ -46,7 +70,7 @@ class RemotePath(URL, DRPathMixin):
     def _accessor(self):
         if self._acc_real is None:
             try:
-                self._acc_real = FILESYSTEMS[self.scheme](settings.FS_OPTS)
+                self._acc_real = FILESYSTEMS[self.scheme](**self.opts)
             except KeyError:
                 raise ValueError('Scheme {} not found in available filesystems'
                                  ', try installing it.'.format(self.scheme))
@@ -98,6 +122,12 @@ class RemotePath(URL, DRPathMixin):
         return self._root \
                + self._flavour.sep.join(urllib.parse.quote(i, safe=safe_pchars) for i in self._parts[begin:-1] + [self.name]) \
                + self.trailing_sep
+    
+    def _make_child(self, args):
+        res = super()._make_child(args)
+        res._storage_options = self._storage_options
+        res._acc_real = self._acc_real
+        return res
 
 
 class LocalPath(PATH_CLASS, DRPathMixin):
@@ -107,7 +137,7 @@ class LocalPath(PATH_CLASS, DRPathMixin):
 class DRPath:
     def __new__(cls, path, *args, **kwargs):
         if cls is DRPath:
-            if get_fs(path).is_remote:
+            if get_fs(path, rtype='class').is_remote:
                 cls = RemotePath
             else:
                 cls = LocalPath
@@ -125,19 +155,15 @@ def asstr(arg):
     return arg
 
 
-def aspath(x, cls=None):
-    if isinstance(x, PurePath):
+def aspath(x):
+    if isinstance(x, DRPath):
         return x
-    if isinstance(x, str):
-        cls = cls or _get_path_class(x)
-        return cls(x)
     if isinstance(x, (list, tuple, set)):
         if len(x) == 0:
             return x
-        cls = cls or _get_path_class(next(iter(x)))  # get first element
-        return type(x)(map(cls, x))  # return the same type of iterable
-    raise TypeError("Cannot convert type {} to Path.".format(
-        type(x).__name__))
+        return type(x)(map(DRPath, x))  # return the same type of iterable
+    else:
+        return DRPath(x)
 
 
 def _get_path_class(path):
