@@ -1,6 +1,6 @@
 import os
 
-from .filesystem import get_fs
+from drfs.filesystems import get_fs
 
 
 def glob(path, opts=None):

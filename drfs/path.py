@@ -5,24 +5,22 @@ from pathlib import Path, PurePath
 from urlpath import URL, cached_property
 
 from drfs import settings
-from drfs.filesystem import FILESYSTEMS, get_fs
+from drfs.filesystems import FILESYSTEMS, get_fs
 
-# Actual type of Path depends on the OS, so we can't subclass from Path
-# directly.
+# Actual type of Path depends on the OS and is determined on instantiation.
 PATH_CLASS = type(Path())
 
 
 # noinspection PyUnresolvedReferences
 class DRPathMixin:
     @property
-    def istemplate(self):
+    def is_template(self):
         s = str(self)
-        return '{' in s and '}' in s
+        return 0 <= s.find('{') < s.find('}')
     
     @property
-    def iswildcard(self):
-        # FIXME: doesn't work for something like *.csv
-        return '*' in self._parts
+    def is_wildcard(self):
+        return '*' in str(self)
     
     @property
     def flag(self):
@@ -156,7 +154,7 @@ def asstr(arg):
 
 
 def aspath(x):
-    if isinstance(x, DRPath):
+    if isinstance(x, DRPathMixin):
         return x
     if isinstance(x, (list, tuple, set)):
         if len(x) == 0:
