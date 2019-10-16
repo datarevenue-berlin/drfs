@@ -68,10 +68,11 @@ class RemotePath(URL, DRPathMixin):
     def _accessor(self):
         if self._acc_real is None:
             try:
-                self._acc_real = FILESYSTEMS[self.scheme](**self.opts)
+                cls = FILESYSTEMS[self.scheme]
             except KeyError:
                 raise ValueError('Scheme {} not found in available filesystems'
                                  ', try installing it.'.format(self.scheme))
+            self._acc_real = cls(**self.opts)
         return self._acc_real
 
     def exists(self):
