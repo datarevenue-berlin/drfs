@@ -20,8 +20,6 @@ def get_fs(path, opts=None, rtype='instance'):
         Either 'instance' (default) or 'class'.
     """
     from drfs.filesystems import FILESYSTEMS
-    from drfs.filesystems.azure_blob import AzureBlobFileSystem, \
-        extract_abfs_parts
     
     try:
         protocol = path.scheme
@@ -39,9 +37,23 @@ def get_fs(path, opts=None, rtype='instance'):
     opts_ = getattr(settings, 'FS_OPTS', {}).copy()  # type: dict
     if opts is not None:
         opts_.update(opts)
-    if cls is AzureBlobFileSystem and 'account_name' not in opts_:
-        opts_['account_name'] = extract_abfs_parts(path)[0]
+    opts_ = _fix_opts_abfs(cls, path, opts_)
     return cls(**opts_)
+
+
+def _fix_opts_abfs(cls, path, opts: dict):
+    try:
+        from drfs.filesystems.azure_blob import AzureBlobFileSystem, \
+            extract_abfs_parts
+    except ImportError:
+        AzureBlobFileSystem = extract_abfs_parts = None
+
+    if AzureBlobFileSystem is not None \
+            and cls is AzureBlobFileSystem \
+            and 'account_name' not in opts:
+        opts = opts.copy()
+        opts['account_name'] = extract_abfs_parts(path)[0]
+    return opts
 
 
 def allow_pathlib(func):
