@@ -67,6 +67,9 @@ class Tree(metaclass=_MetaTree):
                 s = ''
             res = f'{res}{s}'
         return res
+
+    def __repr__(self):
+        return self.__str__()
     
     def add(self, key, value):
         if isinstance(value, (str, DRPathMixin)):
