@@ -1,4 +1,5 @@
 dask-azureblobfs
+azure-datalake-store
 toolz  # required for dask-azureblobfs, for some reason not discovered by pip
 moto
 s3fs

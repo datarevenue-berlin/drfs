@@ -21,7 +21,7 @@ Currently methods that are required to be implemented are:
 
 Which filesystem to use is usually inferred from the path/protocol.
 """
-from .util import allow_pathlib, return_pathlib, return_schemes
+from .util import allow_pathlib, return_pathlib, return_schemes, maybe_remove_scheme
 
 FILESYSTEMS = {}
 
@@ -31,6 +31,7 @@ class FileSystemBase:
     fs_cls = None  # type: type
     scheme = None  # type: str
     is_remote = None  # type: bool
+    supports_scheme = True  # type: bool
 
     def __init__(self, *args, **kwargs):
         if self.fs_cls is None:
@@ -40,20 +41,24 @@ class FileSystemBase:
             self.fs = self.fs_cls(*args, **kwargs)
 
     @allow_pathlib
+    @maybe_remove_scheme
     def open(self, path, *args, **kwargs):
         return self.fs.open(path, *args, **kwargs)
 
     @allow_pathlib
+    @maybe_remove_scheme
     def exists(self, path, *args, **kwargs):
         return self.fs.exists(path, *args, **kwargs)
 
     @return_pathlib
     @return_schemes
     @allow_pathlib
+    @maybe_remove_scheme
     def ls(self, path, *args, **kwargs):
         return self.fs.ls(path, *args, **kwargs)
 
     @allow_pathlib
+    @maybe_remove_scheme
     def remove(self, path, *args, **kwargs):
         try:
             return self.fs.remove(path, *args, **kwargs)
@@ -61,6 +66,7 @@ class FileSystemBase:
             return self.fs.rm(path, *args, **kwargs)
 
     @allow_pathlib
+    @maybe_remove_scheme
     def copy(self, path, *args, **kwargs):
         try:
             return self.fs.copy(path, *args, **kwargs)
@@ -68,30 +74,39 @@ class FileSystemBase:
             return self.fs.cp(path, *args, **kwargs)
 
     @allow_pathlib
+    @maybe_remove_scheme
     def mv(self, path, *args, **kwargs):
         return self.fs.mv(path, *args, **kwargs)
 
     @allow_pathlib
+    @maybe_remove_scheme
     def makedirs(self, path, *args, **kwargs):
-        return self.fs.makedirs(path, *args, **kwargs)
+        try:
+            return self.fs.makedirs(path, *args, **kwargs)
+        except AttributeError:
+            return self.fs.mkdir(path, *args, **kwargs)
 
     @allow_pathlib
+    @maybe_remove_scheme
     def rmdir(self, path, *args, **kwargs):
         return self.fs.rmdir(path, *args, **kwargs)
 
     @allow_pathlib
+    @maybe_remove_scheme
     def info(self, path, *args, **kwargs):
         return self.fs.info(path, *args, **kwargs)
 
     @return_pathlib
     @return_schemes
     @allow_pathlib
+    @maybe_remove_scheme
     def walk(self, *args, **kwargs):
         return self.fs.walk(*args, **kwargs)
 
     @return_pathlib
     @return_schemes
     @allow_pathlib
+    @maybe_remove_scheme
     def glob(self, *args, **kwargs):
         return self.fs.glob(*args, **kwargs)
 
