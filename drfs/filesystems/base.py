@@ -27,6 +27,25 @@ FILESYSTEMS = {}
 
 
 class FileSystemBase:
+    """File System Base
+
+    This is a class that wraps other file system classes to provide consistency API
+    across all file system implementations.
+
+    Attributes
+    ----------
+    fs_cls: Type
+        wrapped class, will be managed and instantiated by a subclass of this class.
+    scheme: str
+        which scheme to use for paths on this storage provider e.g. gcs, s3, file, adl.
+    is_remote: bool
+        should be set to true if the filesystem is a a remote filesystem.
+    supports_scheme: bool
+        should be set to true if the underlying filesystem supports uris
+        containing a scheme. If set to true this class will strip the scheme as
+        specified in the above attribute. E.g. `adl://store/some/file` will be received
+        as `/store/some/file
+    """
 
     fs_cls = None  # type: type
     scheme = None  # type: str
