@@ -42,43 +42,43 @@ class AzureDataLakeFileSystem(FileSystemBase):
 
     def ls(self, path, *args, **kwargs):
         path = self._connect(path)
-        return super(AzureDataLakeFileSystem, self).ls(path, *args, **kwargs)
+        return super().ls(path, *args, **kwargs)
 
     def open(self, path, *args, **kwargs):
         path = self._connect(path)
-        return super(AzureDataLakeFileSystem, self).open(path, *args, **kwargs)
+        return super().open(path, *args, **kwargs)
 
     def exists(self, path, *args, **kwargs):
         path = self._connect(path)
-        return super(AzureDataLakeFileSystem, self).exists(path, *args, **kwargs)
+        return super().exists(path, *args, **kwargs)
 
     def remove(self, path, *args, **kwargs):
         path = self._connect(path)
-        return super(AzureDataLakeFileSystem, self).remove(path, *args, **kwargs)
+        return super().remove(path, *args, **kwargs)
 
     def mv(self, path, *args, **kwargs):
         path = self._connect(path)
-        return super(AzureDataLakeFileSystem, self).mv(path, *args, **kwargs)
+        return super().mv(path, *args, **kwargs)
 
     def makedirs(self, path, *args, **kwargs):
         path = self._connect(path)
-        return super(AzureDataLakeFileSystem, self).makedirs(path, *args, **kwargs)
+        return super().makedirs(path, *args, **kwargs)
 
     def rmdir(self, path, *args, **kwargs):
         path = self._connect(path)
-        return super(AzureDataLakeFileSystem, self).rmdir(path, *args, **kwargs)
+        return super().rmdir(path, *args, **kwargs)
 
     def info(self, path, *args, **kwargs):
         path = self._connect(path)
-        return super(AzureDataLakeFileSystem, self).info(path, *args, **kwargs)
+        return super().info(path, *args, **kwargs)
 
     def walk(self, *args, **kwargs):
         arg0 = self._connect(args[0])
-        return super(AzureDataLakeFileSystem, self).walk(arg0, *args[1:], **kwargs)
+        return super().walk(arg0, *args[1:], **kwargs)
 
     def glob(self, *args, **kwargs):
         arg0 = self._connect(args[0])
-        return super(AzureDataLakeFileSystem, self).glob(arg0, *args[1:], **kwargs)
+        return super().glob(arg0, *args[1:], **kwargs)
 
 
 FILESYSTEMS[AzureDataLakeFileSystem.scheme] = AzureDataLakeFileSystem
