@@ -18,3 +18,7 @@ try:
 except ImportError:
     pass
 
+try:
+    import drfs.filesystems.azure_datalake
+except ImportError:
+    pass

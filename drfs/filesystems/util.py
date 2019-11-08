@@ -2,7 +2,7 @@ import urllib.parse
 from functools import partial, wraps
 
 from drfs import settings
-from drfs.util import prepend_scheme
+from drfs.util import prepend_scheme, remove_scheme
 
 
 def get_fs(path, opts=None, rtype='instance'):
@@ -99,4 +99,16 @@ def return_schemes(func):
         except TypeError:
             res = prepend_scheme(self.scheme, res)
         return res
+    return wrapper
+
+
+def maybe_remove_scheme(func):
+    """Remove scheme from args and kwargs in case underlying fs does not support it."""
+    @wraps(func)
+    def wrapper(self, path, *args, **kwargs):
+        if not self.supports_scheme:
+            path = remove_scheme(path, raise_=False)
+            new_args = [remove_scheme(a, raise_=False) for a in args]
+            new_kwargs = {k : remove_scheme(v, raise_=False) for k, v in kwargs.items()}
+        return func(self, path, *new_args, **new_kwargs)
     return wrapper

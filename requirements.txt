@@ -1,2 +1,2 @@
 pytz
-urlpath
+urlpath==1.1.*

@@ -53,8 +53,8 @@ class Tree(metaclass=_MetaTree):
         )
         nodes = [n for n in nodes if not n[0].startswith('__')]
         return nodes
-    
-    def __str__(self):
+
+    def __repr__(self):
         res = ""
         for node_name, node_value in self._get_nodes():
             if isinstance(node_value, DRPathMixin):

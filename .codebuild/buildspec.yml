@@ -7,7 +7,7 @@ env:
     parameter-store:
         TWINE_PASSWORD: /CodeBuild/PyPi/Dev/pw
         TWINE_USERNAME: /CodeBuild/PyPi/Dev/un
-        TWINE_REPOSITORY: /CodeBuild/PyPi/Dev/url
+        TWINE_REPOSITORY_URL: /CodeBuild/PyPi/Dev/url
 phases:
     install:
         commands:
