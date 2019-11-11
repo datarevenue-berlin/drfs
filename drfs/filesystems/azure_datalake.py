@@ -55,33 +55,31 @@ class AzureDataLakeFileSystem(FileSystemBase):
 
     def open(self, path, *args, **kwargs):
         path = self._connect(path)
-        return [self._add_store_name(p) for p in super().open(path, *args, **kwargs)]
+        return super().open(path, *args, **kwargs)
 
     def exists(self, path, *args, **kwargs):
         path = self._connect(path)
-        return [self._add_store_name(p) for p in super().exists(path, *args, **kwargs)]
+        return super().exists(path, *args, **kwargs)
 
     def remove(self, path, *args, **kwargs):
         path = self._connect(path)
-        return [self._add_store_name(p) for p in super().remove(path, *args, **kwargs)]
+        return super().remove(path, *args, **kwargs)
 
     def mv(self, path, *args, **kwargs):
         path = self._connect(path)
-        return [self._add_store_name(p) for p in super().mv(path, *args, **kwargs)]
+        return super().mv(path, *args, **kwargs)
 
     def makedirs(self, path, *args, **kwargs):
         path = self._connect(path)
-        return [
-            self._add_store_name(p) for p in super().makedirs(path, *args, **kwargs)
-        ]
+        return super().makedirs(path, *args, **kwargs)
 
     def rmdir(self, path, *args, **kwargs):
         path = self._connect(path)
-        return [self._add_store_name(p) for p in super().rmdir(path, *args, **kwargs)]
+        return super().rmdir(path, *args, **kwargs)
 
     def info(self, path, *args, **kwargs):
         path = self._connect(path)
-        return [self._add_store_name(p) for p in super().info(path, *args, **kwargs)]
+        return super().info(path, *args, **kwargs)
 
     def walk(self, *args, **kwargs):
         arg0 = self._connect(args[0])
