@@ -16,6 +16,7 @@ from drfs.filesystems.local import LocalFileSystem
 from drfs.filesystems.memory import MemoryFileSystem
 from drfs.filesystems.util import return_pathlib
 from drfs.path import RemotePath, aspath
+from drfs.util import prepend_scheme
 
 try:
     from drfs.filesystems.s3 import S3FileSystem
@@ -182,3 +183,29 @@ def test_memory_fs():
         res = fp.read()
 
     assert res == b'world'
+
+
+def test_list_files(s3_data_dir):
+    fs = get_fs('s3://s3-bimadi-test-bucket/', rtype='instance')
+
+    res = fs.ls('s3://s3-bimadi-test-bucket/dump/')
+    assert all([str(p).startswith('s3://s3-') for p in res])
+    assert len(res) == 10
+
+
+def test_glob_files(s3_data_dir):
+    fs = get_fs('s3://s3-bimadi-test-bucket/', rtype='instance')
+
+    res = fs.glob('s3://s3-bimadi-test-bucket/dump/*.csv')
+    assert all([str(p).startswith('s3://s3-') for p in res])
+    assert len(res) == 10
+
+
+@pytest.mark.parametrize('scheme, path, exp', [
+    ('s3', 's3-bimadi-bucket/test', 's3://s3-bimadi-bucket/test'),
+    ('s3', 's3://s3-bimadi-bucket/test', 's3://s3-bimadi-bucket/test'),
+    ('', '/user/ubuntu/test', 'file://user/ubuntu/test'),
+    ('', 'file://user/ubuntu/test', 'file://user/ubuntu/test'),
+])
+def test_prepend_scheme(scheme, path, exp):
+    assert prepend_scheme(scheme, path) == exp
