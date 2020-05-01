@@ -13,6 +13,7 @@ import pytest
 from drfs.filesystems import get_fs
 from drfs.filesystems.base import FILESYSTEMS
 from drfs.filesystems.local import LocalFileSystem
+from drfs.filesystems.memory import MemoryFileSystem
 from drfs.filesystems.util import return_pathlib
 from drfs.path import RemotePath, aspath
 
@@ -46,6 +47,7 @@ def _get_fs_tuples():
         ('user/some_file.txt', LocalFileSystem),
         ('file://user/some_file.txt', LocalFileSystem),
         ('/home/user/some_file.txt', LocalFileSystem),
+        ('memory:/home/directory/some_file.txt', MemoryFileSystem),
     ]
     if S3FileSystem:
         res.append(
@@ -155,3 +157,28 @@ def test_return_pathlib():
     assert isinstance(foo.f('hey'), Path)
     assert all([isinstance(item, Path) for item in foo.f(['hey', 'ho'])])
 
+
+def test_memory_fs():
+    fs = MemoryFileSystem()
+
+    with fs.open('memory://some_path/file1.txt', 'wb') as fp:
+        fp.write(b'hello')
+
+    with fs.open('memory://some_path/file2.txt', 'wb') as fp:
+        fp.write(b'world')
+
+    assert set(map(str, fs.ls('memory://some_path'))) == {
+        'memory://some_path/file1.txt',
+        'memory://some_path/file2.txt'
+    }
+
+    fs.rm('memory://some_path/file1.txt')
+
+    assert set(map(str, fs.ls('memory://some_path'))) == {
+        'memory://some_path/file2.txt'
+    }
+
+    with fs.open('memory://some_path/file2.txt', 'rb') as fp:
+        res = fp.read()
+
+    assert res == b'world'
