@@ -1,7 +1,7 @@
 from fsspec.implementations import memory as memfs
 
 from drfs.filesystems.base import FILESYSTEMS, FileSystemBase
-from drfs.filesystems.util import allow_pathlib
+from drfs.filesystems.util import allow_pathlib, maybe_remove_scheme
 
 
 class MemoryFileSystem(FileSystemBase):
@@ -21,6 +21,19 @@ class MemoryFileSystem(FileSystemBase):
     @allow_pathlib
     def rmdir(self, path, **kwargs):
         self.fs.rmdir(path, **kwargs)
+
+    @allow_pathlib
+    @maybe_remove_scheme
+    def exists(self, path):
+        if self.fs.exists(path):
+            return True
+        elif path in self.fs.pseudo_dirs:
+            return True
+        else:
+            for k in self.fs.store.keys():
+                if k.startswith(path):
+                    return True
+        return False
 
     def put(self, filename, path, **kwargs):
         from drfs.path import asstr
