@@ -35,6 +35,22 @@ class MemoryFileSystem(FileSystemBase):
                     return True
         return False
 
+    @allow_pathlib
+    @maybe_remove_scheme
+    def rm(self, path, recursive=False):
+        if recursive:
+            self._recursive_rm(path)
+        else:
+            self.fs.rm(path)
+
+    def _recursive_rm(self, path):
+        for res in self.fs.ls(path, detail=True):
+            if res['type'] == 'directory':
+                self._recursive_rm(res['name'])
+            else:
+                self.fs.rm(res['name'])
+
+
     def put(self, filename, path, **kwargs):
         from drfs.path import asstr
         filename, path = asstr(filename), asstr(path)

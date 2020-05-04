@@ -159,7 +159,7 @@ def test_return_pathlib():
     assert all([isinstance(item, Path) for item in foo.f(['hey', 'ho'])])
 
 
-def test_memory_fs():
+def test_memory_fs_rw():
     fs = MemoryFileSystem()
 
     with fs.open('memory://some_path/file1.txt', 'wb') as fp:
@@ -183,6 +183,20 @@ def test_memory_fs():
         res = fp.read()
 
     assert res == b'world'
+
+
+def test_memory_fs_recursive_rm():
+    uri = RemotePath('memory://root/somedir')
+    fs = MemoryFileSystem()
+
+    with fs.open(uri / 'file', 'wb') as fp:
+        fp.write(b'')
+    with fs.open(uri / 'subdir' / 'file', 'wb') as fp:
+        fp.write(b'')
+
+    fs.rm(uri, recursive=True)
+
+    assert fs.ls(uri) == []
 
 
 def test_list_files(s3_data_dir):
