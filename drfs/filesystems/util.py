@@ -1,5 +1,6 @@
 import urllib.parse
 from functools import partial, wraps
+from pathlib import Path
 
 from drfs import settings
 from drfs.util import prepend_scheme, remove_scheme
@@ -120,7 +121,10 @@ def maybe_remove_scheme(func):
         if not self.supports_scheme:
             path = remove_scheme(path, raise_=False)
             args = [remove_scheme(a, raise_=False) for a in args]
-            kwargs = {k: remove_scheme(v, raise_=False) for k, v in kwargs.items()}
+            kwargs = {
+                k: remove_scheme(v, raise_=False) if isinstance(v, (Path, str)) else v
+                for k, v in kwargs.items()
+            }
 
         return func(self, path, *args, **kwargs)
 
