@@ -85,6 +85,10 @@ class LocalFileSystem(FileSystemBase):
     def touch(self, path):
         self.open(path, 'w').close()
 
+    @allow_pathlib
+    def copy(self, path, *args, **kwargs):
+        return shutil.copy(path, *args, **kwargs)
+
 
 FILESYSTEMS[''] = LocalFileSystem
 FILESYSTEMS['file'] = LocalFileSystem
