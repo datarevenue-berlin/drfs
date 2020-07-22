@@ -13,8 +13,10 @@ import pytest
 from drfs.filesystems import get_fs
 from drfs.filesystems.base import FILESYSTEMS
 from drfs.filesystems.local import LocalFileSystem
+from drfs.filesystems.memory import MemoryFileSystem
 from drfs.filesystems.util import return_pathlib
 from drfs.path import RemotePath, aspath
+from drfs.util import prepend_scheme
 
 try:
     from drfs.filesystems.s3 import S3FileSystem
@@ -46,6 +48,7 @@ def _get_fs_tuples():
         ('user/some_file.txt', LocalFileSystem),
         ('file://user/some_file.txt', LocalFileSystem),
         ('/home/user/some_file.txt', LocalFileSystem),
+        ('memory:/home/directory/some_file.txt', MemoryFileSystem),
     ]
     if S3FileSystem:
         res.append(
@@ -155,3 +158,68 @@ def test_return_pathlib():
     assert isinstance(foo.f('hey'), Path)
     assert all([isinstance(item, Path) for item in foo.f(['hey', 'ho'])])
 
+
+def test_memory_fs_rw():
+    fs = MemoryFileSystem()
+
+    with fs.open('memory://some_path/file1.txt', 'wb') as fp:
+        fp.write(b'hello')
+
+    with fs.open('memory://some_path/file2.txt', 'wb') as fp:
+        fp.write(b'world')
+
+    assert set(map(str, fs.ls('memory://some_path'))) == {
+        'memory://some_path/file1.txt',
+        'memory://some_path/file2.txt'
+    }
+
+    fs.rm('memory://some_path/file1.txt')
+
+    assert set(map(str, fs.ls('memory://some_path'))) == {
+        'memory://some_path/file2.txt'
+    }
+
+    with fs.open('memory://some_path/file2.txt', 'rb') as fp:
+        res = fp.read()
+
+    assert res == b'world'
+
+
+def test_memory_fs_recursive_rm():
+    uri = RemotePath('memory://root/somedir')
+    fs = MemoryFileSystem()
+
+    with fs.open(uri / 'file', 'wb') as fp:
+        fp.write(b'')
+    with fs.open(uri / 'subdir' / 'file', 'wb') as fp:
+        fp.write(b'')
+
+    fs.rm(uri, recursive=True)
+
+    assert fs.ls(uri) == []
+
+
+def test_list_files(s3_data_dir):
+    fs = get_fs('s3://s3-bimadi-test-bucket/', rtype='instance')
+
+    res = fs.ls('s3://s3-bimadi-test-bucket/dump/')
+    assert all([str(p).startswith('s3://s3-') for p in res])
+    assert len(res) == 10
+
+
+def test_glob_files(s3_data_dir):
+    fs = get_fs('s3://s3-bimadi-test-bucket/', rtype='instance')
+
+    res = fs.glob('s3://s3-bimadi-test-bucket/dump/*.csv')
+    assert all([str(p).startswith('s3://s3-') for p in res])
+    assert len(res) == 10
+
+
+@pytest.mark.parametrize('scheme, path, exp', [
+    ('s3', 's3-bimadi-bucket/test', 's3://s3-bimadi-bucket/test'),
+    ('s3', 's3://s3-bimadi-bucket/test', 's3://s3-bimadi-bucket/test'),
+    ('', '/user/ubuntu/test', 'file://user/ubuntu/test'),
+    ('', 'file://user/ubuntu/test', 'file://user/ubuntu/test'),
+])
+def test_prepend_scheme(scheme, path, exp):
+    assert prepend_scheme(scheme, path) == exp
