@@ -1,5 +1,6 @@
 # Filesystem imports:
 import drfs.filesystems.local
+import drfs.filesystems.memory
 from drfs.filesystems.base import FILESYSTEMS
 from drfs.filesystems.util import get_fs
 
