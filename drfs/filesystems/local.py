@@ -46,7 +46,9 @@ class LocalFileSystem(FileSystemBase):
     @allow_pathlib
     def ls(self, path):
         """List directory."""
-        return list(map(lambda x: os.path.join(path, x), os.listdir(path)))
+        if os.path.exists(path):
+            return list(map(lambda x: os.path.join(path, x), os.listdir(path)))
+        return list()
 
     @allow_pathlib
     def mv(self, src, dst):
