@@ -1,4 +1,5 @@
 import inspect
+from copy import copy
 from pathlib import Path
 from textwrap import indent
 from typing import Union
@@ -24,18 +25,18 @@ class _MetaTree(type):
                 new_attrs[attr_name] = attr_value(attr_name)
             else:
                 new_attrs[attr_name] = attr_value
-        
+
         return type.__new__(mcs, name, bases, new_attrs)
-    
+
 
 class Tree(metaclass=_MetaTree):
     def __init__(self, root):
         self.root = DRPath(root)
-    
+
     @property
     def root(self):
         return self._root
-    
+
     @root.setter
     def root(self, value):
         """Recursively set root in this and all child trees."""
@@ -43,9 +44,11 @@ class Tree(metaclass=_MetaTree):
         self._root = value
         for node_name, node_value in self._get_nodes():
             if isinstance(node_value, Tree):
+                node_value = copy(node_value)
+                setattr(self, node_name, node_value)
                 node_root = getattr(node_value, '__root__', node_name)
                 node_value.root = self._root / node_root
-    
+
     def _get_nodes(self):
         nodes = inspect.getmembers(
             self,
@@ -67,7 +70,7 @@ class Tree(metaclass=_MetaTree):
                 s = ''
             res = f'{res}{s}'
         return res
-    
+
     def add(self, key, value):
         if isinstance(value, (str, DRPathMixin)):
             value = _root_function(value)
