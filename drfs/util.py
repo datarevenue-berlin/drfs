@@ -16,7 +16,7 @@ def prepend_scheme(scheme, path):
     """
     if scheme == "":
         scheme = "file"
-    if path.startswith(scheme):
+    if path.startswith(scheme + '://'):
         return path
     else:
         path = path[1:] if path.startswith("/") else path
