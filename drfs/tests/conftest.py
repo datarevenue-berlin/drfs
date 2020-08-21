@@ -20,7 +20,7 @@ def s3_data_dir():
     """Used for testing filesystem and data_import.
 
     The bucket is purposely named s3-... as this previously introduced a bug and
-    it is the default naming scheme for buckets in the centogene cloud.
+    it is often the default naming scheme for buckets in the enterprise clouds.
     """
     mock = mock_s3()
     mock.start()
