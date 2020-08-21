@@ -200,24 +200,24 @@ def test_memory_fs_recursive_rm():
 
 
 def test_list_files(s3_data_dir):
-    fs = get_fs('s3://s3-bimadi-test-bucket/', rtype='instance')
+    fs = get_fs('s3://s3-test-bucket/', rtype='instance')
 
-    res = fs.ls('s3://s3-bimadi-test-bucket/dump/')
+    res = fs.ls('s3://s3-test-bucket/dump/')
     assert all([str(p).startswith('s3://s3-') for p in res])
     assert len(res) == 10
 
 
 def test_glob_files(s3_data_dir):
-    fs = get_fs('s3://s3-bimadi-test-bucket/', rtype='instance')
+    fs = get_fs('s3://s3-test-bucket/', rtype='instance')
 
-    res = fs.glob('s3://s3-bimadi-test-bucket/dump/*.csv')
+    res = fs.glob('s3://s3-test-bucket/dump/*.csv')
     assert all([str(p).startswith('s3://s3-') for p in res])
     assert len(res) == 10
 
 
 @pytest.mark.parametrize('scheme, path, exp', [
-    ('s3', 's3-bimadi-bucket/test', 's3://s3-bimadi-bucket/test'),
-    ('s3', 's3://s3-bimadi-bucket/test', 's3://s3-bimadi-bucket/test'),
+    ('s3', 's3-bucket/test', 's3://s3-bucket/test'),
+    ('s3', 's3://s3-bucket/test', 's3://s3-bucket/test'),
     ('', '/user/ubuntu/test', 'file://user/ubuntu/test'),
     ('', 'file://user/ubuntu/test', 'file://user/ubuntu/test'),
 ])
