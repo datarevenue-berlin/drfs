@@ -17,18 +17,18 @@ class DRPathMixin:
     def is_template(self):
         s = str(self)
         return 0 <= s.find('{') < s.find('}')
-    
+
     @property
     def is_wildcard(self):
         return '*' in str(self)
-    
+
     @property
     def flag(self):
         return self / '_SUCCESS'
-    
+
     def format(self, *args, **kwargs):
         return DRPath(str(self).format(*args, **kwargs))
-    
+
     @property
     def storage_options(self):
         try:
@@ -39,14 +39,14 @@ class DRPathMixin:
         if opts is not None:
             return opts
         return settings.FS_OPTS
-    
+
     opts = storage_options
 
 
 class RemotePath(URL, DRPathMixin):
     """
     A very pathlib.Path version for RemotePaths.
-    
+
     If you use a method that requires an underlying filesystem to
     be instantiated (such as `open`), storage_options may be needed (to provide
     credentials etc.). They are taken from settings.FS_OPTS by default,
@@ -120,12 +120,20 @@ class RemotePath(URL, DRPathMixin):
         return self._root \
                + self._flavour.sep.join(urllib.parse.quote(i, safe=safe_pchars) for i in self._parts[begin:-1] + [self.name]) \
                + self.trailing_sep
-    
+
     def _make_child(self, args):
         res = super()._make_child(args)
         res._storage_options = self._storage_options
         res._acc_real = self._acc_real
         return res
+
+    def startswith(self, *args, **kwargs):
+        """Act like a string - for compatibility with s3fs.put"""
+        return str(self).startswith(*args, **kwargs)
+
+    def __getitem__(self, item):
+        """Act like a string - for compatibility with s3fs.put"""
+        return str(self)[item]
 
 
 class LocalPath(PATH_CLASS, DRPathMixin):
@@ -141,7 +149,7 @@ class DRPath:
                 cls = LocalPath
         obj = cls(path, *args, **kwargs)
         return obj
-    
+
 
 def asstr(arg):
     """Convert arg into its string representation.

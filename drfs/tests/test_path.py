@@ -38,8 +38,20 @@ def test_remote_div(s3):
     assert p2._acc_real is not None
     assert p2._acc_real.fs.key == opts['key']
     assert p2._acc_real.fs.secret == opts['secret']
-    
+
     p3 = p2 / 'test.txt'
     assert p3.storage_options == p2.storage_options
     assert p3._acc_real is not None
     assert p3._acc_real is p2._acc_real
+
+
+def test_path_get_item():
+    p = DRPath("s3://test_bucket")
+
+    assert p[:5] == "s3://"
+
+
+def test_path_startswith():
+    p = DRPath("s3://test_bucket")
+
+    assert p.startswith("s3://")
