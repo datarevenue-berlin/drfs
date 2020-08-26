@@ -1,3 +1,5 @@
+import pytest
+
 from drfs.path import DRPath
 from drfs.settings import FS_OPTS
 
@@ -45,13 +47,27 @@ def test_remote_div(s3):
     assert p3._acc_real is p2._acc_real
 
 
-def test_path_get_item():
-    p = DRPath("s3://test_bucket")
+@pytest.mark.parametrize(
+    ("str_path",),
+    [
+        ("s3://test_bucket",),
+        ("/home/test_dir",),
+    ]
+)
+def test_path_get_item(str_path):
+    p = DRPath(str_path)
 
-    assert p[:5] == "s3://"
+    assert p[:5] == str_path[:5]
 
 
-def test_path_startswith():
-    p = DRPath("s3://test_bucket")
+@pytest.mark.parametrize(
+    ("str_path",),
+    [
+        ("s3://test_bucket",),
+        ("/home/test_dir",),
+    ]
+)
+def test_path_startswith(str_path):
+    p = DRPath(str_path)
 
-    assert p.startswith("s3://")
+    assert p.startswith(str_path[:5])

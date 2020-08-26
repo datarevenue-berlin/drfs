@@ -40,6 +40,14 @@ class DRPathMixin:
             return opts
         return settings.FS_OPTS
 
+    def startswith(self, *args, **kwargs):
+        """Act like a string - for compatibility with s3fs.put"""
+        return str(self).startswith(*args, **kwargs)
+
+    def __getitem__(self, item):
+        """Act like a string - for compatibility with s3fs.put"""
+        return str(self)[item]
+
     opts = storage_options
 
 
@@ -126,14 +134,6 @@ class RemotePath(URL, DRPathMixin):
         res._storage_options = self._storage_options
         res._acc_real = self._acc_real
         return res
-
-    def startswith(self, *args, **kwargs):
-        """Act like a string - for compatibility with s3fs.put"""
-        return str(self).startswith(*args, **kwargs)
-
-    def __getitem__(self, item):
-        """Act like a string - for compatibility with s3fs.put"""
-        return str(self)[item]
 
 
 class LocalPath(PATH_CLASS, DRPathMixin):
