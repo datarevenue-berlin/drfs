@@ -23,7 +23,17 @@ def test_local_filesystem(tmpdir):
         fs.info(non_existing_file)
     with fs.open(existing_file, 'r') as f:
         assert f.read() == 'test'
+
+    copy_path = tmpdir.join('copy.txt')
+    fs.copy(existing_file, copy_path)
+    assert copy_path.exists()
+    copy_path2 = tmpdir.join('copy2.txt')
+    fs.cp(existing_file, copy_path2)
+    assert copy_path2.exists()
+
     fs.remove(existing_file)
+    fs.remove(copy_path)
+    fs.remove(copy_path2)
     assert fs.ls(tmpdir.strpath) == []
     assert not fs.exists(existing_file)
 
