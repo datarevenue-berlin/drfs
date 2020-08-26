@@ -27,7 +27,7 @@ def s3_data_dir():
     import boto3
     import s3fs
     conn = boto3.client("s3")
-    conn.create_bucket(Bucket="s3-bimadi-test-bucket")
+    conn.create_bucket(Bucket="s3-test-bucket")
     fs = s3fs.S3FileSystem()
 
     for i in range(1, 11):

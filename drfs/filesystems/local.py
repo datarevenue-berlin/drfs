@@ -46,13 +46,24 @@ class LocalFileSystem(FileSystemBase):
     @allow_pathlib
     def ls(self, path):
         """List directory."""
-        return list(map(lambda x: os.path.join(path, x), os.listdir(path)))
+        if os.path.exists(path):
+            return list(map(lambda x: os.path.join(path, x), os.listdir(path)))
+        return list()
 
     @allow_pathlib
-    def mv(self, src, dst):
+    def move(self, src, dst):
         """Move file or directory. Source parent dir will be created."""
         self._makedirs_parent(dst)
         shutil.move(src, dst)
+
+    @allow_pathlib
+    def mv(self, src, dst):
+        self.move(src, dst)
+
+    @allow_pathlib
+    def copy(self, src, dst):
+        self._makedirs_parent(dst)
+        shutil.copyfile(src, dst)
 
     @allow_pathlib
     def rmdir(self, path):

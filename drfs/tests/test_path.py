@@ -1,3 +1,5 @@
+import pytest
+
 from drfs.path import DRPath
 from drfs.settings import FS_OPTS
 
@@ -38,8 +40,34 @@ def test_remote_div(s3):
     assert p2._acc_real is not None
     assert p2._acc_real.fs.key == opts['key']
     assert p2._acc_real.fs.secret == opts['secret']
-    
+
     p3 = p2 / 'test.txt'
     assert p3.storage_options == p2.storage_options
     assert p3._acc_real is not None
     assert p3._acc_real is p2._acc_real
+
+
+@pytest.mark.parametrize(
+    ("str_path",),
+    [
+        ("s3://test_bucket",),
+        ("/home/test_dir",),
+    ]
+)
+def test_path_get_item(str_path):
+    p = DRPath(str_path)
+
+    assert p[:5] == str_path[:5]
+
+
+@pytest.mark.parametrize(
+    ("str_path",),
+    [
+        ("s3://test_bucket",),
+        ("/home/test_dir",),
+    ]
+)
+def test_path_startswith(str_path):
+    p = DRPath(str_path)
+
+    assert p.startswith(str_path[:5])

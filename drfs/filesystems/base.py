@@ -94,8 +94,16 @@ class FileSystemBase:
 
     @allow_pathlib
     @maybe_remove_scheme
+    def move(self, path, *args, **kwargs):
+        try:
+            return self.fs.mv(path, *args, **kwargs)
+        except AttributeError:
+            return self.fs.move(path, *args, **kwargs)
+
+    @allow_pathlib
+    @maybe_remove_scheme
     def mv(self, path, *args, **kwargs):
-        return self.fs.mv(path, *args, **kwargs)
+        self.move(path, *args, **kwargs)
 
     @allow_pathlib
     @maybe_remove_scheme
