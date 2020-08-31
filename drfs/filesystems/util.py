@@ -92,7 +92,10 @@ def return_pathlib(func):
         from drfs.path import aspath
 
         res = func(self, path, *args, **kwargs)
-        as_path = aspath(res)
+        if all(isinstance(item, tuple) for item in res):
+            as_path = [(aspath(item[0]),) + item[1:] for item in res]
+        else:
+            as_path = aspath(res)
         return as_path
 
     return wrapper

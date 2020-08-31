@@ -7,7 +7,7 @@ def prepend_scheme(scheme, path):
     ----------
     scheme: str
         a scheme like 'file', 's3' or 'gs'
-    path: str
+    path: str, tuple
         path which will possibly get a scheme prepended
 
     Returns
@@ -16,7 +16,9 @@ def prepend_scheme(scheme, path):
     """
     if scheme == "":
         scheme = "file"
-    if path.startswith(scheme + '://'):
+    if isinstance(path, tuple):
+        return (f"{scheme}://{path[0]}",) + path[1:]
+    elif path.startswith(scheme + '://'):
         return path
     else:
         path = path[1:] if path.startswith("/") else path
