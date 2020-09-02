@@ -48,7 +48,8 @@ def _get_fs_tuples():
         ('user/some_file.txt', LocalFileSystem),
         ('file://user/some_file.txt', LocalFileSystem),
         ('/home/user/some_file.txt', LocalFileSystem),
-        ('memory:/home/directory/some_file.txt', MemoryFileSystem),
+        (r"C:\Users\alhoeng\drfs", LocalFileSystem),
+        ('memory://home/directory/some_file.txt', MemoryFileSystem),
     ]
     if S3FileSystem:
         res.append(
