@@ -25,7 +25,7 @@ def get_fs(path, opts=None, rtype="instance"):
     try:
         protocol = path.scheme
     except AttributeError:
-        protocol = urllib.parse.urlparse(str(path)).scheme
+        protocol = _get_protocol(path)
 
     try:
         cls = FILESYSTEMS[protocol]
@@ -42,6 +42,15 @@ def get_fs(path, opts=None, rtype="instance"):
         opts_.update(opts)
     opts_ = _fix_opts_abfs(cls, path, opts_)
     return cls(**opts_)
+
+
+def _get_protocol(path):
+    if "://" in str(path):
+        protocol = urllib.parse.urlparse(str(path)).scheme
+    else:
+        # most likely a windows path, basically if in doubt assume local
+        protocol = ""
+    return protocol
 
 
 def _fix_opts_abfs(cls, path, opts: dict):
