@@ -38,9 +38,15 @@ class LocalFileSystem(FileSystemBase):
         os.makedirs(*args, **kwargs)
 
     @allow_pathlib
-    def remove(self, path):
-        """Remove a file."""
-        os.remove(path)
+    def remove(self, path, recursive=False):
+        """Remove a file or a directory which may be non-empty."""
+        try:
+            os.remove(path)
+        except IsADirectoryError:
+            if not recursive:
+                self.rmdir(path)
+            else:
+                shutil.rmtree(path)
 
     @return_pathlib
     @allow_pathlib

@@ -61,3 +61,25 @@ def test_walk_scheme_local(tmpdir):
     assert all(isinstance(item, Path) for item in res)
     assert any('deep_test' in str(item) for item in res)
     assert not any(str(item).rstrip('/').endswith('dir1') for item in res)
+
+
+def test_remove(tmpdir):
+    fs = LocalFileSystem()
+    empty_dir = tmpdir / 'empty'
+    fs.makedirs(empty_dir)
+    dir1 = tmpdir / 'dir1'
+    file1 = dir1 / 'deep_test.txt'
+    fs.touch(file1)
+
+    assert fs.exists(empty_dir)
+    fs.remove(empty_dir)
+    assert not fs.exists(empty_dir)
+
+    with pytest.raises(OSError):
+        fs.remove(dir1)
+
+    assert fs.exists(file1)
+    fs.remove(dir1, recursive=True)
+    assert not fs.exists(file1)
+    assert not fs.exists(dir1)
+

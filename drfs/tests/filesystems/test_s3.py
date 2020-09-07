@@ -38,3 +38,15 @@ def test_walk_scheme_s3(s3):
     assert all(str(item).startswith('s3://') for item in res)
     assert any('deep_test' in str(item) for item in res)
     assert not any(str(item).rstrip('/').endswith('dir1') for item in res)
+
+
+def test_remove_recursive(s3):
+    fs = S3FileSystem()
+    fs.touch("s3://test-bucket/dir1/deep_test.txt")
+    fs.touch("s3://test-bucket/dir1/subdir/deeper_test.txt")
+
+    fs.remove("s3://test-bucket/dir1", recursive=True)
+
+    assert not fs.exists("s3://test-bucket/dir1")
+    assert not fs.exists("s3://test-bucket/dir1/deep_test.txt")
+    assert not fs.exists("s3://test-bucket/dir1/subdir/deeper_test.txt")
