@@ -19,6 +19,9 @@ class S3FileSystem(FileSystemBase):
     def rmdir(self, path, **kwargs):
         pass
 
+    def rm(self, path, recursive=False, **kwargs):
+        return self.fs.rm(path, recursive=recursive, **kwargs)
+
     def put(self, filename, path, **kwargs):
         from drfs.path import asstr
         filename, path = asstr(filename), asstr(path)
