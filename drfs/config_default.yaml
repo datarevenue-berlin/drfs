@@ -1,0 +1,7 @@
+rtype: class
+fs_opts:
+    s3: {}
+    abfs: {}
+    gcfs: {}
+    file: {}
+    memory: {}

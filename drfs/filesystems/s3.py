@@ -6,7 +6,7 @@ from drfs.filesystems.util import allow_pathlib
 
 class S3FileSystem(FileSystemBase):
     fs_cls = s3fs.S3FileSystem
-    scheme = 's3'
+    scheme = "s3"
     is_remote = True
 
     @allow_pathlib
@@ -24,13 +24,15 @@ class S3FileSystem(FileSystemBase):
 
     def put(self, filename, path, **kwargs):
         from drfs.path import asstr
+
         filename, path = asstr(filename), asstr(path)
         return self.fs.put(filename, path, **kwargs)
 
     def get(self, path, filename, **kwargs):
         from drfs.path import asstr
+
         path, filename = asstr(path), asstr(filename)
         return self.fs.get(path, filename, **kwargs)
 
 
-FILESYSTEMS['s3'] = S3FileSystem
+FILESYSTEMS["s3"] = S3FileSystem

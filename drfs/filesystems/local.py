@@ -14,7 +14,7 @@ class LocalFileSystem(FileSystemBase):
     """Emulates a remote filesystem on the local disk."""
 
     fs_cls = None  # we could do even without subclassing FSBase
-    scheme = ''
+    scheme = ""
     is_remote = False
 
     @allow_pathlib
@@ -42,7 +42,7 @@ class LocalFileSystem(FileSystemBase):
         """Remove a file or a directory which may be non-empty."""
         try:
             os.remove(path)
-        except IsADirectoryError:
+        except (IsADirectoryError, PermissionError):
             if not recursive:
                 self.rmdir(path)
             else:
@@ -80,17 +80,15 @@ class LocalFileSystem(FileSystemBase):
     def info(self, path):
         """Get a dict with only LastModified time in UTC."""
         mtime = os.path.getmtime(path)
-        return {
-            'LastModified': datetime.datetime.fromtimestamp(mtime, pytz.UTC)
-        }
+        return {"LastModified": datetime.datetime.fromtimestamp(mtime, pytz.UTC)}
 
     @return_pathlib
     @allow_pathlib
     def walk(self, path):
         """Walk over all files in this directory (recursively)."""
-        return [os.path.join(root, f)
-                for root, dirs, files in os.walk(path)
-                for f in files]
+        return [
+            os.path.join(root, f) for root, dirs, files in os.walk(path) for f in files
+        ]
 
     @return_pathlib
     @allow_pathlib
@@ -100,8 +98,8 @@ class LocalFileSystem(FileSystemBase):
 
     @allow_pathlib
     def touch(self, path):
-        self.open(path, 'w').close()
+        self.open(path, "w").close()
 
 
-FILESYSTEMS[''] = LocalFileSystem
-FILESYSTEMS['file'] = LocalFileSystem
+FILESYSTEMS[""] = LocalFileSystem
+FILESYSTEMS["file"] = LocalFileSystem

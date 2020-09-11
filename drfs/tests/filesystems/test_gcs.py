@@ -1,4 +1,5 @@
 import pytest
+
 try:
     from drfs.filesystems.gcs import GCSFileSystem
 except ImportError:

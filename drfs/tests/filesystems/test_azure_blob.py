@@ -7,9 +7,7 @@ except ImportError:
 
 
 def test_extract_abfs_parts():
-    assert extract_abfs_parts('abfs://acc/cont/file') \
-        == ('acc', 'cont', 'file')
-    assert extract_abfs_parts('abfs://acc/cont/dir/file') \
-        == ('acc', 'cont', 'dir/file')
+    assert extract_abfs_parts("abfs://acc/cont/file") == ("acc", "cont", "file")
+    assert extract_abfs_parts("abfs://acc/cont/dir/file") == ("acc", "cont", "dir/file")
     with pytest.raises(ValueError, match="doesn't match abfs"):
-        extract_abfs_parts('abfas://acc/cont/dir/file')
+        extract_abfs_parts("abfas://acc/cont/dir/file")

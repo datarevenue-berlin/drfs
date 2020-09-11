@@ -10,6 +10,7 @@ from .path import DRPath, DRPathMixin
 def _root_function(value):
     def foo(self):
         return self.root / value
+
     return foo
 
 
@@ -17,7 +18,7 @@ class _MetaTree(type):
     def __new__(mcs, name, bases, attrs):
         new_attrs = {}
         for attr_name, attr_value in attrs.items():
-            if attr_name in ['root'] or attr_name.startswith('__'):
+            if attr_name in ["root"] or attr_name.startswith("__"):
                 new_attrs[attr_name] = attr_value
             elif isinstance(attr_value, (str, DRPathMixin)):
                 new_attrs[attr_name] = property(_root_function(attr_value))
@@ -46,29 +47,26 @@ class Tree(metaclass=_MetaTree):
             if isinstance(node_value, Tree):
                 node_value = copy(node_value)
                 setattr(self, node_name, node_value)
-                node_root = getattr(node_value, '__root__', node_name)
+                node_root = getattr(node_value, "__root__", node_name)
                 node_value.root = self._root / node_root
 
     def _get_nodes(self):
-        nodes = inspect.getmembers(
-            self,
-            lambda a: not (inspect.isroutine(a)),
-        )
-        nodes = [n for n in nodes if not n[0].startswith('__')]
+        nodes = inspect.getmembers(self, lambda a: not (inspect.isroutine(a)))
+        nodes = [n for n in nodes if not n[0].startswith("__")]
         return nodes
 
     def __repr__(self):
         res = ""
         for node_name, node_value in self._get_nodes():
             if isinstance(node_value, DRPathMixin):
-                if node_name == 'root':
+                if node_name == "root":
                     continue
-                s = f'{node_name}: {node_value}\n'
+                s = f"{node_name}: {node_value}\n"
             elif isinstance(node_value, Tree):
                 s = f'{node_name}:\n{indent(str(node_value), "    ")}'
             else:
-                s = ''
-            res = f'{res}{s}'
+                s = ""
+            res = f"{res}{s}"
         return res
 
     def add(self, key, value):

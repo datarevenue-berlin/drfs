@@ -25,8 +25,7 @@ def mv(src, dst, opts=None):
 
 def makedirs(path, *args, opts=None, **kwargs):
     """Filesystem-agnostic makedirs."""
-    return get_fs(path, opts=opts) \
-        .makedirs(path, *args, **kwargs)
+    return get_fs(path, opts=opts).makedirs(path, *args, **kwargs)
 
 
 def rmdir(path, opts=None):
@@ -37,7 +36,8 @@ def rmdir(path, opts=None):
 def savefig(path, *args, opts=None, **kwargs):
     """Filesystem-agnostic savefig."""
     import matplotlib.pyplot as plt
+
     path = str(path)  # in case it's pathlib object
     fmt = os.path.splitext(path)[1][1:]
-    with open(path, 'wb', opts=opts) as f:
+    with open(path, "wb", opts=opts) as f:
         plt.savefig(f, format=fmt, *args, **kwargs)

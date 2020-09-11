@@ -8,9 +8,10 @@ def s3():
     m.start()
     import boto3
     import s3fs
-    conn = boto3.client('s3')
-    conn.create_bucket(Bucket='test-bucket')
-    conn.put_object(Bucket='test-bucket', Key='test.txt', Body=b'bla')
+
+    conn = boto3.client("s3")
+    conn.create_bucket(Bucket="test-bucket")
+    conn.put_object(Bucket="test-bucket", Key="test.txt", Body=b"bla")
     yield s3fs.S3FileSystem(anon=False)
     m.stop()
 
@@ -26,6 +27,7 @@ def s3_data_dir():
     mock.start()
     import boto3
     import s3fs
+
     conn = boto3.client("s3")
     conn.create_bucket(Bucket="s3-test-bucket")
     fs = s3fs.S3FileSystem()
