@@ -29,8 +29,8 @@ def test_is_template():
 
 def test_remote_div(s3):
     p1 = DRPath('s3://test-bucket/')
-    config["fs_opts"] = {"s3": {"access_key": "test"}}
-    assert p1.storage_options == config["fs_opts"].get(dict).get("s3", {})
+    config["fs_opts"]["s3"] ={"access_key": "test"}
+    assert p1.storage_options == config["fs_opts"]["s3"].get(dict)
     config["fs_opts"] = {}
 
     opts = {'key': 'abc', 'secret': 'def'}

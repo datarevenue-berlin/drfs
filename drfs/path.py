@@ -38,7 +38,8 @@ class DRPathMixin:
             return None
         if opts is not None:
             return opts
-        return config["fs_opts"].get(dict).get(self.scheme, {})
+        config_scheme_key = self.scheme if self.scheme else "file"
+        return config["fs_opts"][config_scheme_key].get(dict)
 
     def startswith(self, *args, **kwargs):
         """Act like a string - for compatibility with s3fs.put"""
