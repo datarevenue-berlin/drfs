@@ -16,15 +16,15 @@ class DRPathMixin:
     @property
     def is_template(self):
         s = str(self)
-        return 0 <= s.find('{') < s.find('}')
+        return 0 <= s.find("{") < s.find("}")
 
     @property
     def is_wildcard(self):
-        return '*' in str(self)
+        return "*" in str(self)
 
     @property
     def flag(self):
-        return self / '_SUCCESS'
+        return self / "_SUCCESS"
 
     def format(self, *args, **kwargs):
         return DRPath(str(self).format(*args, **kwargs))
@@ -79,8 +79,10 @@ class RemotePath(URL, DRPathMixin):
             try:
                 self._acc_real = FILESYSTEMS[self.scheme](**self.opts)
             except KeyError:
-                raise ValueError('Scheme {} not found in available filesystems'
-                                 ', try installing it.'.format(self.scheme))
+                raise ValueError(
+                    "Scheme {} not found in available filesystems"
+                    ", try installing it.".format(self.scheme)
+                )
         return self._acc_real
 
     def exists(self):
@@ -122,13 +124,18 @@ class RemotePath(URL, DRPathMixin):
         """
 
         # https://tools.ietf.org/html/rfc3986#appendix-A
-        safe_pchars = '-._~!$&\'()*+,;=:@{}%'
+        safe_pchars = "-._~!$&'()*+,;=:@{}%"
 
         begin = 1 if self._drv or self._root else 0
 
-        return self._root \
-               + self._flavour.sep.join(urllib.parse.quote(i, safe=safe_pchars) for i in self._parts[begin:-1] + [self.name]) \
-               + self.trailing_sep
+        return (
+            self._root
+            + self._flavour.sep.join(
+                urllib.parse.quote(i, safe=safe_pchars)
+                for i in self._parts[begin:-1] + [self.name]
+            )
+            + self.trailing_sep
+        )
 
     def _make_child(self, args):
         res = super()._make_child(args)
@@ -144,7 +151,7 @@ class LocalPath(PATH_CLASS, DRPathMixin):
 class DRPath:
     def __new__(cls, path, *args, **kwargs):
         if cls is DRPath:
-            if get_fs(path, rtype='class').is_remote:
+            if get_fs(path, rtype="class").is_remote:
                 cls = RemotePath
             else:
                 cls = LocalPath

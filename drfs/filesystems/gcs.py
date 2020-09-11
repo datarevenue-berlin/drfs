@@ -6,8 +6,9 @@ from drfs.filesystems.util import allow_pathlib
 
 class GCSFileSystem(FileSystemBase):
     """Wrapper for dask's GCSFileSystem."""
+
     fs_cls = gcsfs.GCSFileSystem
-    scheme = 'gs'
+    scheme = "gs"
     is_remote = True
 
     @allow_pathlib
@@ -19,5 +20,5 @@ class GCSFileSystem(FileSystemBase):
         raise NotImplementedError
 
 
-FILESYSTEMS['gs'] = GCSFileSystem
-FILESYSTEMS['gcs'] = GCSFileSystem
+FILESYSTEMS["gs"] = GCSFileSystem
+FILESYSTEMS["gcs"] = GCSFileSystem

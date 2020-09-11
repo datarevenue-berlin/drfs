@@ -6,7 +6,7 @@ from drfs.filesystems.util import allow_pathlib, maybe_remove_scheme
 
 class MemoryFileSystem(FileSystemBase):
     fs_cls = memfs.MemoryFileSystem
-    scheme = 'memory'
+    scheme = "memory"
     is_remote = True
     supports_scheme = False
 
@@ -45,21 +45,22 @@ class MemoryFileSystem(FileSystemBase):
 
     def _recursive_rm(self, path):
         for res in self.fs.ls(path, detail=True):
-            if res['type'] == 'directory':
-                self._recursive_rm(res['name'])
+            if res["type"] == "directory":
+                self._recursive_rm(res["name"])
             else:
-                self.fs.rm(res['name'])
-
+                self.fs.rm(res["name"])
 
     def put(self, filename, path, **kwargs):
         from drfs.path import asstr
+
         filename, path = asstr(filename), asstr(path)
         return self.fs.put(filename, path, **kwargs)
 
     def get(self, path, filename, **kwargs):
         from drfs.path import asstr
+
         path, filename = asstr(path), asstr(filename)
         return self.fs.get(path, filename, **kwargs)
 
 
-FILESYSTEMS['memory'] = MemoryFileSystem
+FILESYSTEMS["memory"] = MemoryFileSystem
