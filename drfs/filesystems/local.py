@@ -42,7 +42,7 @@ class LocalFileSystem(FileSystemBase):
         """Remove a file or a directory which may be non-empty."""
         try:
             os.remove(path)
-        except IsADirectoryError:
+        except (IsADirectoryError, PermissionError):
             if not recursive:
                 self.rmdir(path)
             else:
