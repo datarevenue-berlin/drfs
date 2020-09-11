@@ -2,7 +2,7 @@ import urllib.parse
 from functools import partial, wraps
 from pathlib import Path
 
-from drfs import settings
+from drfs import config
 from drfs.util import prepend_scheme, remove_scheme
 
 
@@ -37,7 +37,7 @@ def get_fs(path, opts=None, rtype="instance"):
             f"installing it. Available protocols are: "
             f"{set(FILESYSTEMS.keys())}"
         )
-    opts_ = getattr(settings, "FS_OPTS", {}).copy()  # type: dict
+    opts_ = config['fs_opts'].get(dict).get(protocol, {})  # type: dict
     if opts is not None:
         opts_.update(opts)
     opts_ = _fix_opts_abfs(cls, path, opts_)

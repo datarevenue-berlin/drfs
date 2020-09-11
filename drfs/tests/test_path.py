@@ -1,8 +1,7 @@
 import pytest
 
+from drfs import config
 from drfs.path import DRPath
-from drfs.settings import FS_OPTS
-
 
 def test_is_wildcard():
     assert not DRPath('/home').is_wildcard
@@ -30,7 +29,9 @@ def test_is_template():
 
 def test_remote_div(s3):
     p1 = DRPath('s3://test-bucket/')
-    assert p1.storage_options == FS_OPTS
+    config["fs_opts"] = {"s3": {"access_key": "test"}}
+    assert p1.storage_options == config["fs_opts"].get(dict).get("s3", {})
+    config["fs_opts"] = {}
 
     opts = {'key': 'abc', 'secret': 'def'}
     p2 = DRPath('s3://test-bucket', storage_options=opts)

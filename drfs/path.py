@@ -4,7 +4,7 @@ from pathlib import Path, PurePath
 
 from urlpath import URL, cached_property
 
-from drfs import settings
+from drfs import config
 from drfs.filesystems import FILESYSTEMS, get_fs
 
 # Actual type of Path depends on the OS and is determined on instantiation.
@@ -38,7 +38,7 @@ class DRPathMixin:
             return None
         if opts is not None:
             return opts
-        return settings.FS_OPTS
+        return config["fs_opts"].get(dict).get(self.scheme, {})
 
     def startswith(self, *args, **kwargs):
         """Act like a string - for compatibility with s3fs.put"""
