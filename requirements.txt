@@ -1,4 +1,4 @@
 pytz
 urlpath==1.1.*
-fsspec==0.8.0
-confuse==1.0.0
+fsspec>=0.8.0
+confuse>=1.0.0
