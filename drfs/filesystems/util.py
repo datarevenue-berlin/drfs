@@ -38,7 +38,7 @@ def get_fs(path, opts=None, rtype="instance"):
             f"{set(FILESYSTEMS.keys())}"
         )
     config_scheme_key = protocol if protocol else "file"
-    opts_ = config["fs_opts"][config_scheme_key].get(dict)  # type: dict
+    opts_ = config["fs_opts"][config_scheme_key].get(dict).copy()  # type: dict
     if opts is not None:
         opts_.update(opts)
     opts_ = _fix_opts_abfs(cls, path, opts_)

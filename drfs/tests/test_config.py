@@ -24,3 +24,11 @@ def test_config_get_fs(s3_opts_config):
     fs = get_fs("s3://bucket", res)
 
     assert fs.fs.key == "test_config"
+
+
+def test_get_fs_no_side_effect():
+    expected = config["fs_opts"]["s3"].get(dict).copy()
+
+    get_fs("s3://bucket", opts=dict(config_kwargs={'read_timeout': 600}))
+
+    assert config["fs_opts"]["s3"].get(dict) == expected
