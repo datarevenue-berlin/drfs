@@ -15,10 +15,6 @@ with open('HISTORY.rst') as history_file:
 with open('requirements.txt') as requirements_file:
     requirements = requirements_file.read().splitlines()
 
-setup_requirements = ['pytest-runner', ]
-
-test_requirements = ['pytest', ]
-
 setup(
     author="Data Revenue GmbH",
     author_email='alan@datarevenue.com',
@@ -38,9 +34,6 @@ setup(
     keywords='drfs',
     name='drfs',
     packages=find_packages(exclude=['drfs.tests.*', 'drfs.tests', 'examples']),
-    setup_requires=setup_requirements,
-    test_suite='tests',
-    tests_require=test_requirements,
     url='https://github.com/datarevenue-berlin/drfs',
     version = versioneer.get_version(),
     cmdclass = versioneer.get_cmdclass(),
