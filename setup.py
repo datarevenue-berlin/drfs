@@ -9,7 +9,7 @@ import versioneer
 with open('README.md') as readme_file:
     readme = readme_file.read()
 
-with open('HISTORY.rst') as history_file:
+with open('HISTORY.md') as history_file:
     history = history_file.read()
 
 with open('requirements.txt') as requirements_file:
@@ -26,10 +26,11 @@ setup(
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
     ],
-    description="Python Boilerplate contains all the boilerplate you need to create a Python package.",
+    description="Storage-type-agnostic file access + file structure for your project",
+    long_description=readme + '\n\n' + history,
+    long_description_content_type="text/markdown",
     install_requires=requirements,
     license="MIT license",
-    long_description=readme + '\n\n' + history,
     include_package_data=True,
     keywords='drfs',
     name='drfs',
