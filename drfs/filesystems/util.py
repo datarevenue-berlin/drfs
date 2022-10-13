@@ -1,4 +1,5 @@
 import urllib.parse
+import warnings
 from functools import partial, wraps
 from pathlib import Path
 
@@ -42,12 +43,14 @@ def get_fs(path, opts=None, rtype="instance"):
     config_scheme_key = protocol if protocol else "file"
     try:
         opts_ = config["fs_opts"][config_scheme_key].get(dict).copy()  # type: dict
-    except confuse.exceptions.NotFoundError as e:
-        raise KeyError(
-            f"Could not find fs_opts.{config_scheme_key} in config. *** "
-            f"Config sources: {config.sources} *** "
-            f"Whole config: {config.dump()}"
-        ) from e
+    except confuse.exceptions.NotFoundError:
+        # FIXME: See https://datarevenue.atlassian.net/browse/CEN-2592
+        warnings.warn(
+            f"Could not find fs_opts.{config_scheme_key} in config. Assuming empty "
+            "dict. This may cause errors if options for this filesystem are actually "
+            "needed but we can't find them for some reason."
+        )
+        opts_ = {}
     if opts is not None:
         opts_.update(opts)
     opts_ = _fix_opts_abfs(cls, path, opts_)
