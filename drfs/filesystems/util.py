@@ -2,6 +2,8 @@ import urllib.parse
 from functools import partial, wraps
 from pathlib import Path
 
+import confuse.exceptions
+
 from drfs import config
 from drfs.util import prepend_scheme, remove_scheme
 
@@ -38,7 +40,14 @@ def get_fs(path, opts=None, rtype="instance"):
             f"{set(FILESYSTEMS.keys())}"
         )
     config_scheme_key = protocol if protocol else "file"
-    opts_ = config["fs_opts"][config_scheme_key].get(dict).copy()  # type: dict
+    try:
+        opts_ = config["fs_opts"][config_scheme_key].get(dict).copy()  # type: dict
+    except confuse.exceptions.NotFoundError as e:
+        raise KeyError(
+            f"Could not find fs_opts.{config_scheme_key} in config. *** "
+            f"Config sources: {config.sources} *** "
+            f"Whole config: {config.dump()}"
+        ) from e
     if opts is not None:
         opts_.update(opts)
     opts_ = _fix_opts_abfs(cls, path, opts_)
